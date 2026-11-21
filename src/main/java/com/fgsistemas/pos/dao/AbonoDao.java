@@ -14,7 +14,8 @@ import java.util.List;
 /** Abonos de clientes a su cuenta de fiado. */
 public class AbonoDao {
 
-    public record Abono(long id, long clienteId, long turnoId, String usuarioNombre, long monto, MetodoPago metodo,
+    public record Abono(long id, long clienteId, String clienteNombre, long turnoId, String usuarioNombre, long monto,
+                        MetodoPago metodo,
                         long saldoAnterior, long saldoNuevo, LocalDateTime fecha, String notas) {
     }
 
@@ -49,15 +50,17 @@ public class AbonoDao {
     private List<Abono> listar(Connection c, String condicion, long valor) throws SQLException {
         List<Abono> lista = new ArrayList<>();
         try (PreparedStatement ps = c.prepareStatement(
-                "SELECT a.id, a.cliente_id, a.turno_id, u.nombre, a.monto, a.metodo, a.saldo_anterior, "
+                "SELECT a.id, a.cliente_id, cl.nombre, a.turno_id, u.nombre, a.monto, a.metodo, a.saldo_anterior, "
                         + "a.saldo_nuevo, a.fecha, a.notas FROM abonos a JOIN usuarios u ON u.id = a.usuario_id "
+                        + "JOIN clientes cl ON cl.id = a.cliente_id "
                         + "WHERE " + condicion + " ORDER BY a.fecha, a.id")) {
             ps.setLong(1, valor);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    lista.add(new Abono(rs.getLong(1), rs.getLong(2), rs.getLong(3), rs.getString(4), rs.getLong(5),
-                            MetodoPago.valueOf(rs.getString(6)), rs.getLong(7), rs.getLong(8),
-                            Fechas.deTexto(rs.getString(9)), rs.getString(10)));
+                    lista.add(new Abono(rs.getLong(1), rs.getLong(2), rs.getString(3), rs.getLong(4), rs.getString(5),
+                            rs.getLong(6),
+                            MetodoPago.valueOf(rs.getString(7)), rs.getLong(8), rs.getLong(9),
+                            Fechas.deTexto(rs.getString(10)), rs.getString(11)));
                 }
             }
         }

@@ -21,6 +21,7 @@ Solo admin.
 | USUARIOS | ✅ | ❌ |
 | CONFIGURACION | ✅ | ❌ |
 | RESPALDOS | ✅ | ❌ |
+| CORTE_TURNO_AJENO | ✅ | ❌ (con autorización de admin) |
 
 Implementar como `Map<Rol, Set<Permiso>>` en código (no en BD por ahora).
 Dejar preparado para que en el futuro haya permisos personalizados por usuario.

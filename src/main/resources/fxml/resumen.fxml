@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Resumen del día (17-resumen-del-dia.md). El contenido se arma en el controlador. -->
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:id="raiz" fx:controller="com.fgsistemas.pos.controller.ResumenController">
+    <top>
+        <fx:include source="barra-superior.fxml"/>
+    </top>
+
+    <center>
+        <ScrollPane fx:id="scroll" fitToWidth="true">
+            <VBox fx:id="contenido" spacing="16">
+                <padding>
+                    <Insets top="20" right="32" bottom="20" left="32"/>
+                </padding>
+                <HBox spacing="16" alignment="CENTER_LEFT">
+                    <Label text="Resumen del día" styleClass="titulo"/>
+                    <HBox fx:id="cajaModo" spacing="8" alignment="CENTER_LEFT"/>
+                </HBox>
+                <Label fx:id="lblPeriodo" styleClass="texto-secundario"/>
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <FlowPane fx:id="barraAcciones" styleClass="barra-acciones"/>
+    </bottom>
+</BorderPane>

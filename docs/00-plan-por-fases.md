@@ -6,13 +6,13 @@ Trabaja una fase a la vez. No avances sin que compile, corra y cumpla los criter
 | Fase | Estado | Notas |
 |---|---|---|
 | 1 Base | ✅ Verificada por el cliente | |
-| 2 Primera vez, login, turno | ✅ Verificada | "Corte y abrir nuevo" del turno ajeno queda para la Fase 7 |
+| 2 Primera vez, login, turno | ✅ Verificada | "Corte y abrir nuevo" del turno ajeno: hecho en la Fase 7 |
 | 3 Menú y usuarios | ✅ Verificada | + botones visibles y contador de ventas (pedido del cliente) |
 | 4 Inventario y entradas | ✅ Verificada | + categoría nueva desde el formulario |
 | 5 Vender y cancelaciones | ✅ Verificada | Vender con mosaicos de iniciales; clientes solo alta rápida |
 | 6 Fiados | ✅ Verificada | Saldo a favor se usa en la siguiente venta a fiado; ver decisiones 31–39 |
-| 7 Resumen y cortes | ⏳ Siguiente | |
-| 8 Configuración y respaldos | Pendiente | |
+| 7 Resumen y cortes | ✅ Verificada | + corte de turno ajeno, total con todo y fondo, Gastos e ingresos; decisiones 41–51 |
+| 8 Configuración y respaldos | ⏳ Siguiente | |
 | 9 Pulido | Pendiente | Incluye devolución parcial (24-cancelaciones) |
 
 Las decisiones tomadas en el camino están en `docs/05-decisiones.md`.

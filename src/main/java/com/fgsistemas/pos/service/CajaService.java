@@ -15,6 +15,17 @@ public class CajaService {
     private final MovimientoCajaDao cajaDao = new MovimientoCajaDao();
     private final BitacoraDao bitacoraDao = new BitacoraDao();
 
+    /** Gastos (retiros) e ingresos (entradas) del turno actual, del más antiguo al más reciente. */
+    public java.util.List<MovimientoCajaDao.Movimiento> movimientosTurno() throws SQLException {
+        Sesion.requiere(Permiso.VENDER);
+        if (Sesion.turno() == null) {
+            return java.util.List.of();
+        }
+        try (java.sql.Connection c = Database.conectar()) {
+            return cajaDao.delTurno(c, Sesion.turno().getId());
+        }
+    }
+
     /**
      * Registra el movimiento en el turno actual. Los retiros requieren permiso RETIROS_CAJA
      * o autorización de un admin.

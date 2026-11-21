@@ -59,6 +59,21 @@ public class ExportService {
 
     public Path excel(Path archivo, String nombreHoja, List<String> encabezados, List<List<Object>> filas)
             throws IOException {
+        return excel(archivo, List.of(new Hoja(nombreHoja, encabezados, filas)));
+    }
+
+    /** Una hoja del libro de Excel. */
+    public record Hoja(String nombre, List<String> encabezados, List<List<Object>> filas) {
+    }
+
+    /** Crea {@code <nombreBase>_<fecha>.xlsx} con varias hojas y regresa su ruta. */
+    public Path excel(String nombreBase, List<Hoja> hojas) throws IOException {
+        Path carpeta = carpeta();
+        Files.createDirectories(carpeta);
+        return excel(carpeta.resolve(nombreBase + "_" + SELLO.format(Fechas.ahora()) + ".xlsx"), hojas);
+    }
+
+    public Path excel(Path archivo, List<Hoja> hojas) throws IOException {
         try (XSSFWorkbook libro = new XSSFWorkbook()) {
             DataFormat formato = libro.createDataFormat();
             CellStyle estiloEncabezado = libro.createCellStyle();
@@ -70,6 +85,21 @@ public class ExportService {
             CellStyle estiloCantidad = libro.createCellStyle();
             estiloCantidad.setDataFormat(formato.getFormat("#,##0.###"));
 
+            for (Hoja h : hojas) {
+                escribirHoja(libro, h.nombre(), h.encabezados(), h.filas(), estiloEncabezado, estiloDinero,
+                        estiloCantidad);
+            }
+            try (OutputStream out = Files.newOutputStream(archivo)) {
+                libro.write(out);
+            }
+        }
+        return archivo;
+    }
+
+    private static void escribirHoja(XSSFWorkbook libro, String nombreHoja, List<String> encabezados,
+                                     List<List<Object>> filas, CellStyle estiloEncabezado, CellStyle estiloDinero,
+                                     CellStyle estiloCantidad) {
+        {
             Sheet hoja = libro.createSheet(nombreHoja);
             Row fila0 = hoja.createRow(0);
             for (int i = 0; i < encabezados.size(); i++) {
@@ -102,10 +132,6 @@ public class ExportService {
             for (int i = 0; i < encabezados.size(); i++) {
                 hoja.autoSizeColumn(i);
             }
-            try (OutputStream out = Files.newOutputStream(archivo)) {
-                libro.write(out);
-            }
         }
-        return archivo;
     }
 }

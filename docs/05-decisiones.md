@@ -88,3 +88,32 @@ Este archivo **manda** sobre el resto de los docs si hay contradicción.
 40. **Entrada de mercancía: buscar por nombre en el mismo campo del código.** Enter: código exacto → lo carga;
     si lo escrito coincide con un solo producto (código o nombre) → lo carga; con varios → abre la búsqueda
     (F2) con lo escrito; sin coincidencias → ofrece crear el producto (solo si parece un código válido).
+
+## Fase 7 (Resumen y cortes)
+41. **Una sola fuente de cifras**: el Resumen, el Corte y Cortes pasados calculan con el mismo código
+    (`ResumenDao`), así los números siempre coinciden. Ventas en efectivo = `venta_pagos.monto` (sin cambio);
+    las canceladas no suman en nada (solo se reportan aparte, número y monto).
+42. **Ganancia** = Σ (importe − costo × cantidad, redondeado por renglón) − descuentos. La ve quien ve costos
+    (admin); al cajero el servicio se la entrega vacía.
+43. **"Todo el día"** (admin) suma todos los turnos de hoy. No muestra "efectivo que debería haber ahora"
+    (cada turno ya hizo su corte); eso se ve en "Turno actual".
+44. **Top 10** ordenado por importe (los productos se venden en unidades distintas: pza, kg, m).
+45. **Corte**: lo hace quien está en el turno (admin o cajero). La vista previa no guarda nada; al cerrar se
+    recalculan las cifras con los datos finales. Diferencia ≠ 0 → nota obligatoria. Contado por total o por
+    denominación (`D`); el desglose no se guarda, solo el total.
+46. **Corte de turno ajeno** (desde la pantalla de turno): permiso nuevo `CORTE_TURNO_AJENO` (admin); el cajero
+    necesita autorización de admin. Al terminar pide el fondo del turno nuevo.
+47. **Después del corte propio** se cierra sesión (el siguiente login pide fondo nuevo).
+48. **Exportar el corte**: `F7` PDF y `Shift+F7` Excel al terminar el corte; en el detalle de Cortes pasados
+    `F7` Excel (como pide el módulo 19, con hoja de ventas del turno) y `Shift+F7` PDF.
+49. **Cortes pasados**: el filtro "Usuario" es quien abrió el turno; abre en la última semana; `H` / `S` / `M`
+    hoy, esta semana (desde el lunes) y este mes. La diferencia sale roja si faltó y verde si sobró o cuadró.
+
+## Después de la Fase 7 (cliente)
+50. **En el corte, en grande arriba**: "Debe haber en caja (con fondo)" y "Total con todo y fondo"
+    = lo que debe haber en caja + tarjeta + transferencia (ventas y abonos). El fiado no cuenta porque no se
+    cobró. También sale arriba en el PDF y como renglón en el desglose/Excel.
+51. **Pantalla "Gastos e ingresos"** (menú, `F10` o `0`; quien vende): usa los mismos movimientos de caja que
+    `F8` en Vender (gasto = retiro, ingreso = entrada) y entran al corte. Categorías rápidas (teclas 1–9 con el
+    foco en la categoría) + detalle; el detalle es obligatorio en "Otro". Los gastos del cajero piden
+    autorización de admin (igual que los retiros). No se borran: un error se corrige con el movimiento contrario.

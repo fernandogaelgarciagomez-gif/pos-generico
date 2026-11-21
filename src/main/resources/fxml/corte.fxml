@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.StackPane?>
+
+<!-- Corte de caja (18-corte-de-caja.md): conteo a ciegas → resultado → confirmar. Las tarjetas se arman en el controlador. -->
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:id="raiz" fx:controller="com.fgsistemas.pos.controller.CorteController">
+    <top>
+        <fx:include source="barra-superior.fxml"/>
+    </top>
+
+    <center>
+        <ScrollPane fx:id="scroll" fitToWidth="true" fitToHeight="true">
+            <StackPane fx:id="centro">
+                <padding>
+                    <Insets top="24" right="32" bottom="24" left="32"/>
+                </padding>
+            </StackPane>
+        </ScrollPane>
+    </center>
+</BorderPane>

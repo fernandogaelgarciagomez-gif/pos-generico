@@ -796,3 +796,67 @@
     -fx-font-size: 16px;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 18, 0.2, 0, 4);
 }
+
+/* ---------- Resumen del día y corte de caja ---------- */
+.tarjeta-dato {
+    -fx-background-color: -pos-superficie;
+    -fx-background-radius: 14;
+    -fx-border-color: -pos-borde;
+    -fx-border-radius: 14;
+    -fx-padding: 14 22 14 22;
+    -fx-spacing: 4;
+    -fx-min-width: 230;
+}
+
+.tarjeta-dato .contador-monto {
+    -fx-font-size: 28px;
+}
+
+.panel-seccion {
+    -fx-background-color: -pos-superficie;
+    -fx-background-radius: 14;
+    -fx-border-color: -pos-borde;
+    -fx-border-radius: 14;
+    -fx-padding: 16 20 16 20;
+    -fx-spacing: 8;
+}
+
+.corte-linea .label {
+    -fx-font-size: 17px;
+}
+
+.corte-total .label {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-border-color: -pos-borde transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+    -fx-padding: 4 0 0 0;
+}
+
+.corte-seccion {
+    -fx-text-fill: -pos-texto-sec;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-padding: 10 0 0 0;
+}
+
+.corte-diferencia {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+
+.corte-diferencia.falta {
+    -fx-text-fill: -pos-peligro;
+}
+
+.corte-diferencia.sobra {
+    -fx-text-fill: -pos-exito;
+}
+
+.denominacion {
+    -fx-pref-width: 110;
+}
+
+.tarjeta-dato .monto-gigante {
+    -fx-font-size: 40px;
+}

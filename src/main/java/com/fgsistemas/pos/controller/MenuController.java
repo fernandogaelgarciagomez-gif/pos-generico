@@ -47,12 +47,14 @@ public class MenuController {
             new Opcion(1, "Vender", "mdi2c-cart", Permiso.VENDER, "vender", 0),
             new Opcion(2, "Inventario", "mdi2p-package-variant-closed", Permiso.VER_INVENTARIO, "inventario", 0),
             new Opcion(3, "Entrada de mercancía", "mdi2t-truck-delivery", Permiso.ENTRADA_MERCANCIA, "entrada", 0),
-            new Opcion(4, "Resumen del día", "mdi2c-chart-bar", Permiso.VER_RESUMEN_DIA, null, 7),
-            new Opcion(5, "Corte de caja", "mdi2c-cash-register", Permiso.HACER_CORTE, null, 7),
-            new Opcion(6, "Cortes pasados", "mdi2h-history", Permiso.VER_CORTES_PASADOS, null, 7),
+            new Opcion(4, "Resumen del día", "mdi2c-chart-bar", Permiso.VER_RESUMEN_DIA, "resumen", 0),
+            new Opcion(5, "Corte de caja", "mdi2c-cash-register", Permiso.HACER_CORTE, "corte", 0),
+            new Opcion(6, "Cortes pasados", "mdi2h-history", Permiso.VER_CORTES_PASADOS, "cortes", 0),
             new Opcion(7, "Fiados / Clientes", "mdi2a-account-cash", Permiso.FIADOS_VENDER, "fiados", 0),
             new Opcion(8, "Usuarios", "mdi2a-account-multiple", Permiso.USUARIOS, "usuarios", 0),
-            new Opcion(9, "Configuración", "mdi2c-cog", Permiso.CONFIGURACION, null, 8));
+            new Opcion(9, "Configuración", "mdi2c-cog", Permiso.CONFIGURACION, null, 8),
+            // Pedido del cliente tras la Fase 7: F10 o 0.
+            new Opcion(10, "Gastos e ingresos", "mdi2c-cash-multiple", Permiso.VENDER, "gastos", 0));
 
     @FXML private BorderPane raiz;
     @FXML private HBox bandaAviso;
@@ -197,6 +199,9 @@ public class MenuController {
                     || code == KeyCode.valueOf("NUMPAD" + n)) {
                 return n;
             }
+        }
+        if (code == KeyCode.F10 || code == KeyCode.DIGIT0 || code == KeyCode.NUMPAD0) {
+            return 10;
         }
         return 0;
     }

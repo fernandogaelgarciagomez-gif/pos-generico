@@ -41,6 +41,7 @@ Objetivo: el cajero opera todo sin tocar el mouse. Esto se prueba en cada fase.
 | F7 o 7 | Fiados / Clientes |
 | F8 o 8 | Usuarios (admin) |
 | F9 o 9 | Configuración (admin) |
+| F10 o 0 | Gastos e ingresos |
 | F12 | Cerrar sesión |
 | Flechas | Moverse entre botones |
 | Enter | Abrir botón enfocado |
@@ -94,4 +95,10 @@ usuario admin → contraseña → Enter.
   `F5` solo con adeudo, `Esc` menú (o limpiar la búsqueda). Admin: `Enter` editar, `Supr` desactivar/reactivar
   (cajero: `Enter` abre el historial). En Abonar: `E` / `T` / `R` método, `L` liquidar todo, `Enter` confirma.
   En el historial: `Enter` ver productos de la venta, `F7` PDF, `Shift+F7` Excel.
-- **Cortes pasados** (Fase 7): flechas para elegir, `Enter` ver detalle, `F7` exportar a Excel.
+- **Gastos e ingresos**: `G` nuevo gasto, `I` nuevo ingreso (categoría con ↑ ↓ o 1–9), `Esc` menú.
+- **Resumen del día**: `T` turno actual / `D` todo el día (admin), `F5` actualizar, `F7` Excel, `Esc` menú.
+- **Corte de caja**: Paso 1 contar (`D` total o por denominación, Tab entre denominaciones, `Enter` continuar,
+  `Esc` regresar); Paso 2 resultado (`Enter` cerrar turno, `Esc` regresar al conteo); Paso 3 `F7` PDF,
+  `Shift+F7` Excel, `Enter` terminar.
+- **Cortes pasados**: `H` hoy, `S` esta semana, `M` este mes, flechas para elegir, `Enter` ver detalle,
+  `F7` exportar a Excel. En el detalle: `Enter` ver la venta, `F7` Excel, `Shift+F7` PDF.

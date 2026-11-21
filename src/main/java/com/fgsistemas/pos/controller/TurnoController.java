@@ -1,6 +1,9 @@
 package com.fgsistemas.pos.controller;
 
+import com.fgsistemas.pos.model.Permiso;
 import com.fgsistemas.pos.model.Turno;
+import com.fgsistemas.pos.service.Autorizacion;
+import com.fgsistemas.pos.util.Navegador;
 import com.fgsistemas.pos.service.TurnoService;
 import com.fgsistemas.pos.util.Alertas;
 import com.fgsistemas.pos.util.Dinero;
@@ -126,11 +129,22 @@ public class TurnoController {
         if (turnoDeOtro == null) {
             return;
         }
-        // TODO Fase 7: corte de caja del turno ajeno (admin, o cajero con autorización de admin)
-        // y después pedir fondo para el turno nuevo.
-        Alertas.info("Próximamente", "El corte de caja se construye en la Fase 7.\n"
-                + "Por ahora puedes continuar con el turno abierto.");
-        btnContinuar.requestFocus();
+        // Corte del turno ajeno: admin directo; cajero con autorización de admin. Después se pide fondo nuevo.
+        if (!Sesion.tiene(Permiso.HACER_CORTE)) {
+            Alertas.advertencia("No tienes permiso para hacer cortes de caja.");
+            btnContinuar.requestFocus();
+            return;
+        }
+        Autorizacion auth = null;
+        if (!Sesion.tiene(Permiso.CORTE_TURNO_AJENO)) {
+            auth = VentaDialogos.pedirAutorizacion("Corte del turno de " + turnoDeOtro.getUsuarioNombre());
+            if (auth == null) {
+                btnCorte.requestFocus();
+                return;
+            }
+        }
+        CorteController corte = Navegador.ir("corte");
+        corte.iniciarTurnoAjeno(turnoDeOtro, auth);
     }
 
     @FXML

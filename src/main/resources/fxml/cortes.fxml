@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Cortes pasados (19-cortes-pasados.md). Solo admin. -->
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:id="raiz" fx:controller="com.fgsistemas.pos.controller.CortesController">
+    <top>
+        <fx:include source="barra-superior.fxml"/>
+    </top>
+
+    <center>
+        <VBox spacing="12">
+            <padding>
+                <Insets top="20" right="32" bottom="16" left="32"/>
+            </padding>
+            <Label text="Cortes pasados" styleClass="titulo"/>
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <Label text="Desde"/>
+                <DatePicker fx:id="dpDesde" prefWidth="170"/>
+                <Label text="Hasta"/>
+                <DatePicker fx:id="dpHasta" prefWidth="170"/>
+                <Label text="Usuario"/>
+                <ComboBox fx:id="cmbUsuario" prefWidth="240"/>
+                <HBox fx:id="cajaRapidos" spacing="8" alignment="CENTER_LEFT"/>
+            </HBox>
+            <TableView fx:id="tabla" VBox.vgrow="ALWAYS"/>
+            <Label fx:id="lblPie" styleClass="pie-tabla"/>
+        </VBox>
+    </center>
+
+    <bottom>
+        <FlowPane fx:id="barraAcciones" styleClass="barra-acciones"/>
+    </bottom>
+</BorderPane>

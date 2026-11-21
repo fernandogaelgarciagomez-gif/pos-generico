@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Gastos e ingresos de caja del turno (pedido del cliente después de la Fase 7). -->
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:id="raiz" fx:controller="com.fgsistemas.pos.controller.GastosController">
+    <top>
+        <fx:include source="barra-superior.fxml"/>
+    </top>
+
+    <center>
+        <VBox spacing="12">
+            <padding>
+                <Insets top="20" right="32" bottom="16" left="32"/>
+            </padding>
+            <Label text="Gastos e ingresos" styleClass="titulo"/>
+            <Label text="Dinero que sale o entra a la caja y no es una venta (pago a proveedor, luz, cambio, etc.). Se refleja en el corte."
+                   styleClass="texto-secundario" wrapText="true"/>
+            <FlowPane fx:id="cajaTotales" hgap="16" vgap="12"/>
+            <TableView fx:id="tabla" VBox.vgrow="ALWAYS"/>
+        </VBox>
+    </center>
+
+    <bottom>
+        <FlowPane fx:id="barraAcciones" styleClass="barra-acciones"/>
+    </bottom>
+</BorderPane>

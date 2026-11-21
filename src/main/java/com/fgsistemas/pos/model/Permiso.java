@@ -17,5 +17,7 @@ public enum Permiso {
     RETIROS_CAJA,
     USUARIOS,
     CONFIGURACION,
-    RESPALDOS
+    RESPALDOS,
+    /** Hacer el corte de un turno abierto por otro usuario (sin autorización: solo admin). */
+    CORTE_TURNO_AJENO
 }
