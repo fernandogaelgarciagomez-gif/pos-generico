@@ -31,6 +31,9 @@ import javafx.scene.layout.HBox;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.SQLException;
+import com.fgsistemas.pos.service.Validacion;
+import com.fgsistemas.pos.util.Texto;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -208,12 +211,34 @@ public class EntradaController {
                 cargarCaptura(p.get(), null);
                 return;
             }
+            // DECISION: igual que en Vender, el campo también acepta parte del nombre (05-decisiones.md #40).
+            if (catalogo == null) {
+                catalogo = inventario.listar(false);
+            }
         } catch (SQLException e) {
             Flujo.errorDatos(e);
             return;
         }
-        if (Alertas.confirmar("No existe un producto activo con el código \"" + codigo + "\".\n"
-                + "¿Crear producto nuevo?")) {
+        List<Producto> coincidencias = catalogo.stream()
+                .filter(p -> Texto.contieneTodas(p.getCodigo() + " " + p.getNombre(), codigo))
+                .toList();
+        if (coincidencias.size() == 1) {
+            cargarCaptura(coincidencias.get(0), null);
+            return;
+        }
+        if (coincidencias.size() > 1) {
+            buscar();
+            return;
+        }
+        if (Validacion.codigoProducto(codigo) != null) { // no parece código (p. ej. lleva espacios)
+            Alertas.advertencia("No hay productos que coincidan con \"" + codigo + "\".\n"
+                    + "Revisa lo escrito o da de alta el producto en Inventario.");
+            txtCodigo.requestFocus();
+            txtCodigo.selectAll();
+            return;
+        }
+        if (Alertas.confirmar("No existe un producto activo con el código o nombre \"" + codigo + "\".\n"
+                + "¿Crear producto nuevo con ese código?")) {
             Optional<Producto> creado = ProductoDialogos.formulario(null, codigo);
             if (creado.isPresent()) {
                 catalogo = null; // recargar el catálogo de búsqueda

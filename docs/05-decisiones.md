@@ -83,3 +83,8 @@ Este archivo **manda** sobre el resto de los docs si hay contradicción.
     cancelaciones se hacen desde Vender).
 38. **Notas del cliente** en un campo de una línea (Enter avanza/guarda como en todo formulario).
 39. Un cliente nuevo creado desde Fiados desactiva el filtro "Solo con adeudo" para que se vea en la lista.
+
+## Después de la Fase 6 (cliente)
+40. **Entrada de mercancía: buscar por nombre en el mismo campo del código.** Enter: código exacto → lo carga;
+    si lo escrito coincide con un solo producto (código o nombre) → lo carga; con varios → abre la búsqueda
+    (F2) con lo escrito; sin coincidencias → ofrece crear el producto (solo si parece un código válido).

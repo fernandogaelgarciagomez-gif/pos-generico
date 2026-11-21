@@ -85,7 +85,7 @@ usuario admin → contraseña → Enter.
   `K` movimientos (kardex), `Supr` desactivar/reactivar, `F5` solo stock bajo, `F7` exportar,
   `F8` lista de compras, `Esc` menú (o limpiar la búsqueda). En el formulario: `Ctrl+G` nueva categoría,
   ↑ ↓ cambian "Se vende por".
-- **Entrada de mercancía**: Proveedor → Factura → Código (Enter) → Cantidad (Enter) → Costo (Enter);
+- **Entrada de mercancía**: Proveedor → Factura → Código o nombre (Enter) → Cantidad (Enter) → Costo (Enter);
   `F2` buscar, `Enter` en la tabla editar renglón, `Supr` quitar, `F10` guardar, `F11` historial,
   `Esc` cancelar la captura / salir (confirma si hay renglones).
 - **Usuarios**: `Ins`/`Ctrl+N` nuevo, `Enter` editar, `R` restablecer contraseña, `Supr` desactivar,

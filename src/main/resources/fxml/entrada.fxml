@@ -42,8 +42,8 @@
                     </VBox>
                 </HBox>
 
-                <Label text="Código del producto (Enter) · F2 para buscar por nombre" styleClass="texto-secundario"/>
-                <TextField fx:id="txtCodigo" styleClass="campo-grande" promptText="Escribe o escanea el código…"/>
+                <Label text="Código o nombre del producto (Enter) · F2 abre la búsqueda" styleClass="texto-secundario"/>
+                <TextField fx:id="txtCodigo" styleClass="campo-grande" promptText="Escribe el código o parte del nombre…"/>
 
                 <!-- Línea de captura: producto → cantidad → costo -->
                 <GridPane fx:id="lineaCaptura" hgap="12" vgap="4" styleClass="panel-lateral">
