@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Vender (14-vender.md + 05-decisiones #24): mosaicos a la izquierda, carrito y cobro a la derecha. -->
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:id="raiz" fx:controller="com.fgsistemas.pos.controller.VenderController">
+    <top>
+        <fx:include source="barra-superior.fxml"/>
+    </top>
+
+    <center>
+        <HBox spacing="18">
+            <padding>
+                <Insets top="16" right="20" bottom="12" left="20"/>
+            </padding>
+
+            <!-- Izquierda: buscador / código, categorías y mosaicos -->
+            <VBox spacing="10" HBox.hgrow="ALWAYS">
+                <TextField fx:id="txtCodigo" styleClass="campo-grande"
+                           promptText="Código, 3*código, 0.250*código, \$50*código… o escribe para buscar"/>
+                <HBox spacing="12" alignment="CENTER_LEFT">
+                    <Label fx:id="lblCoincidencias" styleClass="texto-secundario"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="lblAviso" styleClass="texto-advertencia"/>
+                </HBox>
+                <!-- Con muchas categorías: máximo ~2 filas visibles y el resto con scroll (no empuja los mosaicos) -->
+                <ScrollPane fx:id="scrollChips" fitToWidth="true" maxHeight="100" hbarPolicy="NEVER"
+                            vbarPolicy="AS_NEEDED" focusTraversable="false">
+                    <FlowPane fx:id="chips" hgap="8" vgap="8">
+                        <padding>
+                            <Insets top="2" right="2" bottom="2" left="2"/>
+                        </padding>
+                    </FlowPane>
+                </ScrollPane>
+                <ScrollPane fx:id="scrollMosaicos" fitToWidth="true" VBox.vgrow="ALWAYS" focusTraversable="false">
+                    <FlowPane fx:id="mosaicos" hgap="14" vgap="14">
+                        <padding>
+                            <Insets top="4" right="4" bottom="4" left="4"/>
+                        </padding>
+                    </FlowPane>
+                </ScrollPane>
+            </VBox>
+
+            <!-- Derecha: carrito y totales -->
+            <VBox styleClass="panel-lateral" prefWidth="520" minWidth="440" spacing="8">
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="Venta" styleClass="subtitulo"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="lblCliente" styleClass="texto-secundario"/>
+                </HBox>
+                <TableView fx:id="tabla" VBox.vgrow="ALWAYS" focusTraversable="false">
+                    <placeholder>
+                        <Label text="Escribe un código o toca un producto" wrapText="true"/>
+                    </placeholder>
+                </TableView>
+                <Separator/>
+                <HBox styleClass="fila-total">
+                    <Label text="Subtotal" styleClass="texto-secundario"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="lblSubtotal" text="\$0.00"/>
+                </HBox>
+                <HBox styleClass="fila-total">
+                    <Label fx:id="lblDescuentoTitulo" text="Descuento" styleClass="texto-secundario"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="lblDescuento" text="\$0.00"/>
+                </HBox>
+                <HBox alignment="BOTTOM_LEFT">
+                    <VBox>
+                        <Label text="TOTAL" styleClass="texto-secundario"/>
+                        <Label fx:id="lblArticulos" text="0 artículos" styleClass="texto-pequeno"/>
+                    </VBox>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="lblTotal" text="\$0.00" styleClass="total"/>
+                </HBox>
+                <Button fx:id="btnCobrar" text="Cobrar  (F10)" styleClass="boton-cobrar" maxWidth="Infinity"
+                        focusTraversable="false" onAction="#cobrar"/>
+            </VBox>
+        </HBox>
+    </center>
+
+    <bottom>
+        <FlowPane fx:id="barraAcciones" styleClass="barra-acciones"/>
+    </bottom>
+</BorderPane>

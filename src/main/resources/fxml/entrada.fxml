@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Entrada de mercancía (16-entrada-mercancia.md). Layout parecido a Vender. -->
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:id="raiz" fx:controller="com.fgsistemas.pos.controller.EntradaController">
+    <top>
+        <fx:include source="barra-superior.fxml"/>
+    </top>
+
+    <center>
+        <HBox spacing="20">
+            <padding>
+                <Insets top="20" right="24" bottom="16" left="24"/>
+            </padding>
+
+            <!-- Izquierda: captura y tabla -->
+            <VBox spacing="10" HBox.hgrow="ALWAYS">
+                <Label text="Entrada de mercancía" styleClass="titulo"/>
+                <HBox spacing="12" alignment="CENTER_LEFT">
+                    <VBox spacing="4" HBox.hgrow="ALWAYS">
+                        <Label text="Proveedor" styleClass="texto-secundario"/>
+                        <ComboBox fx:id="cmbProveedor" editable="true" maxWidth="Infinity"
+                                  promptText="Opcional (escribe o elige con Alt+↓)"/>
+                    </VBox>
+                    <VBox spacing="4" prefWidth="220">
+                        <Label text="No. de factura / nota" styleClass="texto-secundario"/>
+                        <TextField fx:id="txtFactura" promptText="Opcional"/>
+                    </VBox>
+                </HBox>
+
+                <Label text="Código del producto (Enter) · F2 para buscar por nombre" styleClass="texto-secundario"/>
+                <TextField fx:id="txtCodigo" styleClass="campo-grande" promptText="Escribe o escanea el código…"/>
+
+                <!-- Línea de captura: producto → cantidad → costo -->
+                <GridPane fx:id="lineaCaptura" hgap="12" vgap="4" styleClass="panel-lateral">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="ALWAYS"/>
+                        <ColumnConstraints prefWidth="170"/>
+                        <ColumnConstraints prefWidth="170"/>
+                        <ColumnConstraints prefWidth="150"/>
+                    </columnConstraints>
+                    <Label fx:id="lblCapturaProducto" text="Escribe un código para empezar" styleClass="subtitulo"
+                           wrapText="true" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                    <Label fx:id="lblCantidad" text="Cantidad" styleClass="texto-secundario"
+                           GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                    <Label text="Costo unitario" styleClass="texto-secundario"
+                           GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+                    <Label text="Subtotal" styleClass="texto-secundario"
+                           GridPane.columnIndex="3" GridPane.rowIndex="0"/>
+                    <Label fx:id="lblCapturaInfo" styleClass="texto-pequeno" wrapText="true"
+                           GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                    <TextField fx:id="txtCantidad" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                    <TextField fx:id="txtCosto" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+                    <Label fx:id="lblCapturaSubtotal" text="—" styleClass="subtitulo"
+                           GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+                </GridPane>
+
+                <TableView fx:id="tabla" VBox.vgrow="ALWAYS">
+                    <placeholder>
+                        <Label text="Aún no hay productos en esta entrada"/>
+                    </placeholder>
+                </TableView>
+            </VBox>
+
+            <!-- Derecha: totales -->
+            <VBox styleClass="panel-lateral" prefWidth="320" minWidth="280" spacing="10">
+                <Label text="Total a costo" styleClass="texto-secundario"/>
+                <Label fx:id="lblTotal" text="\$0.00" styleClass="total"/>
+                <Label fx:id="lblRenglones" text="0 productos" styleClass="texto-secundario"/>
+                <Label fx:id="lblPiezas" styleClass="texto-secundario" wrapText="true"/>
+                <Separator/>
+                <CheckBox fx:id="chkPagadoCaja" text="Pagado de la caja" wrapText="true"/>
+                <Label text="Si lo marcas, el total se registra como retiro de efectivo del turno y aparece en el corte."
+                       styleClass="texto-pequeno" wrapText="true"/>
+                <Separator/>
+                <Label text="Notas" styleClass="texto-secundario"/>
+                <TextField fx:id="txtNotas" promptText="Opcional"/>
+            </VBox>
+        </HBox>
+    </center>
+
+    <bottom>
+        <FlowPane fx:id="barraAcciones" styleClass="barra-acciones"/>
+    </bottom>
+</BorderPane>

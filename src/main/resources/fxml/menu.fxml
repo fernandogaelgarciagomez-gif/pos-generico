@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Menú principal (13-menu-principal.md) -->
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:id="raiz" fx:controller="com.fgsistemas.pos.controller.MenuController">
+    <top>
+        <fx:include source="barra-superior.fxml"/>
+    </top>
+
+    <center>
+        <StackPane>
+            <VBox alignment="CENTER" spacing="24" maxWidth="1112" maxHeight="-Infinity">
+                <HBox fx:id="bandaAviso" styleClass="banda-aviso" alignment="CENTER_LEFT"
+                      visible="false" managed="false">
+                    <Label fx:id="lblAviso" wrapText="true"/>
+                </HBox>
+
+                <!-- Contador de dinero vendido -->
+                <HBox styleClass="contador-ventas">
+                    <VBox alignment="CENTER" spacing="2">
+                        <Label text="Vendido en este turno" styleClass="contador-titulo"/>
+                        <Label fx:id="lblVendidoTurno" text="\$0.00" styleClass="contador-monto"/>
+                        <Label fx:id="lblVentasTurno" text="0 ventas" styleClass="contador-detalle"/>
+                    </VBox>
+                    <VBox fx:id="cajaHoy" alignment="CENTER" spacing="2" visible="false" managed="false">
+                        <Label text="Vendido hoy (todos los turnos)" styleClass="contador-titulo"/>
+                        <Label fx:id="lblVendidoHoy" text="\$0.00" styleClass="contador-monto"/>
+                        <Label fx:id="lblVentasHoy" text="0 ventas" styleClass="contador-detalle"/>
+                    </VBox>
+                </HBox>
+
+                <!-- 4 columnas de 260 px + 3 espacios de 24 px = 1112 px; cada fila queda centrada -->
+                <FlowPane fx:id="grid" hgap="24" vgap="24" prefWrapLength="1112" alignment="CENTER"/>
+            </VBox>
+        </StackPane>
+    </center>
+
+    <bottom>
+        <FlowPane fx:id="barraAcciones" styleClass="barra-acciones">
+            <Label text="Clic o F1–F9 para abrir  ·  Flechas para moverte  ·  Enter abrir" styleClass="pie-tabla"/>
+        </FlowPane>
+    </bottom>
+</BorderPane>

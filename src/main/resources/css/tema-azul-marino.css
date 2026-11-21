@@ -1,0 +1,783 @@
+/*
+ * Tema azul marino — docs/03-diseno-ui.md
+ * No inventar colores: usar solo las variables de .root.
+ */
+
+.root {
+    /* Paleta */
+    -pos-fondo: #0B1A33;
+    -pos-superficie: #13284D;
+    -pos-superficie-alt: #16305A;
+    -pos-elevada: #1B3563;
+    -pos-boton: #1F4E99;
+    -pos-boton-foco: #2E6BD1;
+    -pos-acento: #4FA3FF;
+    -pos-texto: #FFFFFF;
+    -pos-texto-sec: #A9BCDB;
+    -pos-exito: #22C55E;
+    -pos-advertencia: #F59E0B;
+    -pos-peligro: #EF4444;
+    -pos-borde: #2A4475;
+
+    /* Ajustes de Modena para que los controles hereden el tema */
+    -fx-base: -pos-elevada;
+    -fx-background: -pos-fondo;
+    -fx-control-inner-background: -pos-elevada;
+    -fx-control-inner-background-alt: -pos-superficie-alt;
+    -fx-accent: -pos-boton-foco;
+    -fx-focus-color: -pos-acento;
+    -fx-faint-focus-color: transparent;
+    -fx-selection-bar: -pos-boton-foco;
+    -fx-selection-bar-non-focused: -pos-boton;
+    -fx-text-base-color: -pos-texto;
+    -fx-text-background-color: -pos-texto;
+    -fx-text-inner-color: -pos-texto;
+    -fx-prompt-text-fill: -pos-texto-sec;
+
+    -fx-background-color: -pos-fondo;
+    -fx-font-family: "Segoe UI", "System";
+    -fx-font-size: 16px;
+}
+
+/* ---------- Texto ---------- */
+.label {
+    -fx-text-fill: -pos-texto;
+}
+
+.titulo {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+}
+
+.subtitulo {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.texto-secundario {
+    -fx-text-fill: -pos-texto-sec;
+}
+
+.texto-pequeno {
+    -fx-font-size: 13px;
+    -fx-text-fill: -pos-texto-sec;
+}
+
+.total {
+    -fx-font-size: 48px;
+    -fx-font-weight: bold;
+}
+
+.dinero {
+    -fx-alignment: center-right;
+}
+
+.texto-error {
+    -fx-text-fill: -pos-peligro;
+    -fx-font-size: 13px;
+}
+
+.texto-exito {
+    -fx-text-fill: -pos-exito;
+}
+
+.texto-advertencia {
+    -fx-text-fill: -pos-advertencia;
+}
+
+.texto-peligro {
+    -fx-text-fill: -pos-peligro;
+}
+
+/* ---------- Contenedores ---------- */
+.tarjeta {
+    -fx-background-color: -pos-superficie;
+    -fx-background-radius: 16;
+    -fx-border-color: -pos-borde;
+    -fx-border-radius: 16;
+    -fx-border-width: 1;
+    -fx-padding: 32;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.45), 24, 0.2, 0, 6);
+}
+
+.tarjeta-login {
+    -fx-pref-width: 420;
+    -fx-max-width: 420;
+}
+
+.barra-superior {
+    -fx-background-color: -pos-superficie;
+    -fx-min-height: 56;
+    -fx-pref-height: 56;
+    -fx-padding: 0 24 0 24;
+    -fx-spacing: 24;
+    -fx-alignment: center-left;
+    -fx-border-color: transparent transparent -pos-borde transparent;
+}
+
+.barra-atajos {
+    -fx-background-color: -pos-superficie;
+    -fx-padding: 8 24 8 24;
+    -fx-border-color: -pos-borde transparent transparent transparent;
+}
+
+.barra-atajos .label {
+    -fx-text-fill: -pos-texto-sec;
+    -fx-font-size: 14px;
+}
+
+/* Barra inferior de acciones: un botón por acción, con su atajo en una "tecla" */
+/* FlowPane: si los botones no caben en una fila, pasan a la siguiente (nunca se recortan) */
+.barra-acciones {
+    -fx-background-color: -pos-superficie;
+    -fx-padding: 10 16 10 16;
+    -fx-hgap: 8;
+    -fx-vgap: 8;
+    -fx-alignment: center-left;
+    -fx-border-color: -pos-borde transparent transparent transparent;
+}
+
+.boton-accion {
+    -fx-background-color: -pos-elevada;
+    -fx-border-color: -pos-borde;
+    -fx-border-width: 1;
+    -fx-padding: 6 14 6 8;
+    -fx-min-height: 40;
+    -fx-font-size: 15px;
+    -fx-graphic-text-gap: 8;
+}
+
+.boton-accion:hover {
+    -fx-background-color: -pos-boton-foco;
+}
+
+.boton-accion.boton-principal {
+    -fx-background-color: -pos-boton;
+    -fx-border-color: -pos-acento;
+}
+
+.boton-accion.boton-principal:hover {
+    -fx-background-color: -pos-boton-foco;
+}
+
+.tecla-chip {
+    -fx-background-color: -pos-fondo;
+    -fx-background-radius: 5;
+    -fx-border-color: -pos-borde;
+    -fx-border-radius: 5;
+    -fx-padding: 1 7 1 7;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -pos-texto-sec;
+}
+
+/* Contador de ventas en el menú */
+.contador-ventas {
+    -fx-background-color: -pos-superficie;
+    -fx-background-radius: 16;
+    -fx-border-color: -pos-borde;
+    -fx-border-radius: 16;
+    -fx-padding: 16 28 16 28;
+    -fx-spacing: 40;
+    -fx-alignment: center;
+}
+
+.contador-titulo {
+    -fx-text-fill: -pos-texto-sec;
+    -fx-font-size: 14px;
+}
+
+.contador-monto {
+    -fx-font-size: 34px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -pos-exito;
+}
+
+.contador-detalle {
+    -fx-text-fill: -pos-texto-sec;
+    -fx-font-size: 14px;
+}
+
+/* ---------- Vender: mosaicos de productos ---------- */
+/* Excepción documentada (05-decisiones #24): paleta fija de 8 colores para distinguir productos. */
+.mosaico {
+    -fx-background-color: -pos-superficie;
+    -fx-background-radius: 14;
+    -fx-border-color: -pos-borde;
+    -fx-border-radius: 14;
+    -fx-border-width: 2;
+    -fx-padding: 10;
+    -fx-pref-width: 176;
+    -fx-min-width: 176;
+    -fx-max-width: 176;
+    -fx-cursor: hand;
+}
+
+.mosaico:hover {
+    -fx-border-color: -pos-acento;
+    -fx-background-color: -pos-elevada;
+}
+
+.mosaico:pressed {
+    -fx-background-color: -pos-boton;
+}
+
+.mosaico-imagen {
+    -fx-background-radius: 10;
+    -fx-min-height: 104;
+    -fx-pref-height: 104;
+    -fx-max-height: 104;
+}
+
+.mosaico-iniciales {
+    -fx-font-size: 44px;
+    -fx-font-weight: bold;
+    -fx-text-fill: rgba(255, 255, 255, 0.95);
+}
+
+.mosaico-nombre {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -pos-texto;
+}
+
+.mosaico-precio {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -pos-acento;
+}
+
+.mosaico-stock {
+    -fx-font-size: 13px;
+    -fx-text-fill: -pos-exito;
+}
+
+.mosaico-stock.bajo {
+    -fx-text-fill: -pos-advertencia;
+}
+
+.mosaico-stock.agotado {
+    -fx-text-fill: -pos-peligro;
+}
+
+.mosaico-color-0 { -fx-background-color: #2F6FD6; }
+.mosaico-color-1 { -fx-background-color: #8B5CF6; }
+.mosaico-color-2 { -fx-background-color: #E07B24; }
+.mosaico-color-3 { -fx-background-color: #D9455F; }
+.mosaico-color-4 { -fx-background-color: #2FA36B; }
+.mosaico-color-5 { -fx-background-color: #1F9AA8; }
+.mosaico-color-6 { -fx-background-color: #C9A227; }
+.mosaico-color-7 { -fx-background-color: #C2569B; }
+
+/* Chips de categorías */
+.chip {
+    -fx-background-color: -pos-superficie;
+    -fx-background-radius: 20;
+    -fx-border-color: -pos-borde;
+    -fx-border-radius: 20;
+    -fx-border-width: 1;
+    -fx-padding: 6 16 6 16;
+    -fx-text-fill: -pos-texto;
+    -fx-font-size: 15px;
+    -fx-cursor: hand;
+}
+
+.chip:hover {
+    -fx-background-color: -pos-elevada;
+}
+
+.chip:selected {
+    -fx-background-color: -pos-boton-foco;
+    -fx-border-color: -pos-acento;
+    -fx-font-weight: bold;
+}
+
+/* Botón COBRAR y totales de Vender */
+.boton-cobrar {
+    -fx-background-color: -pos-exito;
+    -fx-text-fill: -pos-fondo;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-min-height: 64;
+    -fx-background-radius: 12;
+}
+
+.boton-cobrar:hover,
+.boton-cobrar:focused {
+    -fx-background-color: derive(-pos-exito, 15%);
+}
+
+.cambio {
+    -fx-font-size: 48px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -pos-exito;
+}
+
+.metodo-pago {
+    -fx-background-color: -pos-superficie;
+    -fx-border-color: -pos-borde;
+    -fx-border-width: 2;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-text-fill: -pos-texto;
+    -fx-font-size: 16px;
+    -fx-padding: 10 18 10 12;
+    -fx-graphic-text-gap: 8;
+}
+
+.metodo-pago:selected {
+    -fx-background-color: -pos-boton-foco;
+    -fx-border-color: -pos-acento;
+    -fx-font-weight: bold;
+}
+
+.fila-total .label {
+    -fx-font-size: 17px;
+}
+
+/* Panel lateral (totales en entrada / vender) */
+.panel-lateral {
+    -fx-background-color: -pos-superficie;
+    -fx-background-radius: 12;
+    -fx-border-color: -pos-borde;
+    -fx-border-radius: 12;
+    -fx-padding: 20;
+    -fx-spacing: 10;
+}
+
+.pie-tabla {
+    -fx-text-fill: -pos-texto-sec;
+    -fx-font-size: 14px;
+}
+
+.banda-aviso {
+    -fx-background-color: -pos-advertencia;
+    -fx-background-radius: 8;
+    -fx-padding: 10 16 10 16;
+}
+
+.banda-aviso .label {
+    -fx-text-fill: -pos-fondo;
+    -fx-font-weight: bold;
+}
+
+/* Logo genérico (cuando el negocio no ha cargado uno) */
+.logo-generico {
+    -fx-background-color: -pos-boton;
+    -fx-background-radius: 40;
+    -fx-min-width: 80;
+    -fx-min-height: 80;
+    -fx-max-width: 80;
+    -fx-max-height: 80;
+    -fx-border-color: -pos-acento;
+    -fx-border-radius: 40;
+    -fx-border-width: 3;
+}
+
+.logo-generico-texto {
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -pos-texto;
+}
+
+.indicador-pasos .label {
+    -fx-text-fill: -pos-acento;
+    -fx-font-size: 20px;
+}
+
+/* ---------- Botones ---------- */
+.button {
+    -fx-background-color: -pos-boton;
+    -fx-text-fill: -pos-texto;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: transparent;
+    -fx-border-width: 3;
+    -fx-padding: 8 20 8 20;
+    -fx-min-height: 44;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: -pos-boton-foco;
+}
+
+.button:focused {
+    -fx-background-color: -pos-boton-foco;
+    -fx-border-color: -pos-acento;
+    -fx-effect: dropshadow(gaussian, rgba(79, 163, 255, 0.55), 12, 0.3, 0, 0);
+}
+
+.button:pressed {
+    -fx-background-color: -pos-boton;
+}
+
+.button:disabled {
+    -fx-opacity: 0.45;
+}
+
+.boton-secundario {
+    -fx-background-color: transparent;
+    -fx-border-color: -pos-borde;
+    -fx-text-fill: -pos-texto-sec;
+}
+
+.boton-secundario:hover,
+.boton-secundario:focused {
+    -fx-background-color: -pos-elevada;
+    -fx-text-fill: -pos-texto;
+}
+
+.boton-secundario:focused {
+    -fx-border-color: -pos-acento;
+}
+
+.boton-peligro {
+    -fx-background-color: -pos-peligro;
+}
+
+.boton-peligro:hover,
+.boton-peligro:focused {
+    -fx-background-color: derive(-pos-peligro, 15%);
+}
+
+/* Botones grandes del menú principal: 260×140 */
+.boton-menu {
+    -fx-min-width: 260;
+    -fx-pref-width: 260;
+    -fx-max-width: 260;
+    -fx-min-height: 140;
+    -fx-pref-height: 140;
+    -fx-max-height: 140;
+    -fx-background-color: -pos-superficie;
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-border-color: -pos-borde;
+    -fx-border-width: 3;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-content-display: top;
+    -fx-graphic-text-gap: 10;
+}
+
+.boton-menu:hover {
+    -fx-background-color: -pos-elevada;
+}
+
+.boton-menu:focused {
+    -fx-background-color: -pos-boton;
+    -fx-border-color: -pos-acento;
+    -fx-effect: dropshadow(gaussian, rgba(79, 163, 255, 0.6), 18, 0.35, 0, 0);
+}
+
+.icono-menu {
+    -fx-icon-color: -pos-acento;
+    -fx-icon-size: 44px;
+}
+
+.boton-menu:focused .icono-menu {
+    -fx-icon-color: -pos-texto;
+}
+
+.barra-negocio {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.barra-reloj {
+    -fx-text-fill: -pos-texto;
+    -fx-font-size: 15px;
+}
+
+.atajo-boton {
+    -fx-text-fill: -pos-texto-sec;
+    -fx-font-size: 13px;
+}
+
+.insignia {
+    -fx-background-color: -pos-advertencia;
+    -fx-background-radius: 12;
+    -fx-padding: 2 10 2 10;
+    -fx-text-fill: -pos-fondo;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+
+/* ---------- Campos ---------- */
+.text-field,
+.password-field,
+.text-area,
+.combo-box,
+.date-picker {
+    -fx-background-color: -pos-elevada;
+    -fx-text-fill: -pos-texto;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: -pos-borde;
+    -fx-border-width: 3;
+    -fx-highlight-fill: -pos-boton-foco;
+    -fx-highlight-text-fill: -pos-texto;
+}
+
+.text-field,
+.password-field,
+.combo-box,
+.date-picker {
+    -fx-min-height: 44;
+    -fx-pref-height: 44;
+}
+
+.text-field,
+.password-field {
+    -fx-padding: 0 12 0 12;
+}
+
+.text-field:focused,
+.password-field:focused,
+.text-area:focused,
+.combo-box:focused,
+.date-picker:focused {
+    -fx-border-color: -pos-acento;
+    -fx-effect: dropshadow(gaussian, rgba(79, 163, 255, 0.45), 10, 0.25, 0, 0);
+}
+
+.text-field.campo-invalido,
+.password-field.campo-invalido {
+    -fx-border-color: -pos-peligro;
+}
+
+.text-area .content {
+    -fx-background-color: -pos-elevada;
+}
+
+.campo-grande {
+    -fx-font-size: 24px;
+    -fx-min-height: 60;
+    -fx-pref-height: 60;
+}
+
+.combo-box .list-cell {
+    -fx-text-fill: -pos-texto;
+    -fx-background-color: transparent;
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: -pos-elevada;
+    -fx-border-color: -pos-borde;
+}
+
+.combo-box-popup .list-cell {
+    -fx-background-color: -pos-elevada;
+    -fx-text-fill: -pos-texto;
+}
+
+.combo-box-popup .list-cell:filled:hover,
+.combo-box-popup .list-cell:filled:selected {
+    -fx-background-color: -pos-boton-foco;
+}
+
+.check-box .box {
+    -fx-background-color: -pos-elevada;
+    -fx-border-color: -pos-borde;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+}
+
+.check-box:focused .box {
+    -fx-border-color: -pos-acento;
+    -fx-border-width: 2;
+}
+
+.check-box:selected .mark {
+    -fx-background-color: -pos-texto;
+}
+
+.check-box:selected .box {
+    -fx-background-color: -pos-boton-foco;
+}
+
+/* ---------- Tablas ---------- */
+.table-view {
+    -fx-background-color: -pos-superficie;
+    -fx-border-color: -pos-borde;
+    -fx-border-width: 1;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-table-cell-border-color: transparent;
+}
+
+.table-view:focused {
+    -fx-border-color: -pos-acento;
+    -fx-border-width: 3;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: -pos-elevada;
+    -fx-background-radius: 8 8 0 0;
+}
+
+.table-view .column-header,
+.table-view .filler {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent -pos-borde transparent;
+    -fx-size: 40;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: -pos-texto-sec;
+    -fx-font-weight: bold;
+}
+
+.table-row-cell {
+    -fx-background-color: -pos-superficie;
+    -fx-cell-size: 40;
+    -fx-text-fill: -pos-texto;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: -pos-superficie-alt;
+}
+
+.table-row-cell:selected,
+.table-row-cell:selected:odd {
+    -fx-background-color: -pos-boton-foco;
+}
+
+.table-row-cell .table-cell {
+    -fx-text-fill: -pos-texto;
+    -fx-padding: 0 12 0 12;
+    -fx-alignment: center-left;
+}
+
+.table-row-cell .table-cell.dinero {
+    -fx-alignment: center-right;
+}
+
+.table-row-cell.stock-bajo .table-cell {
+    -fx-text-fill: -pos-advertencia;
+}
+
+.table-row-cell.stock-bajo:selected .table-cell {
+    -fx-text-fill: -pos-texto;
+}
+
+.table-row-cell.inactivo .table-cell {
+    -fx-text-fill: -pos-texto-sec;
+}
+
+.table-row-cell.inactivo:selected .table-cell {
+    -fx-text-fill: -pos-texto;
+}
+
+.table-row-cell.cancelada .table-cell {
+    -fx-text-fill: -pos-peligro;
+    -fx-strikethrough: true;
+}
+
+.table-view .placeholder .label {
+    -fx-text-fill: -pos-texto-sec;
+}
+
+/* ---------- Pestañas ---------- */
+.tab-pane .tab-header-background {
+    -fx-background-color: -pos-superficie;
+}
+
+.tab-pane .tab {
+    -fx-background-color: transparent;
+    -fx-padding: 6 18 6 18;
+}
+
+.tab-pane .tab:selected {
+    -fx-background-color: -pos-elevada;
+    -fx-border-color: transparent transparent -pos-acento transparent;
+    -fx-border-width: 3;
+}
+
+.tab-pane .tab .tab-label {
+    -fx-text-fill: -pos-texto-sec;
+}
+
+.tab-pane .tab:selected .tab-label {
+    -fx-text-fill: -pos-texto;
+}
+
+/* ---------- Barras de desplazamiento ---------- */
+.scroll-pane,
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: -pos-borde;
+    -fx-background-radius: 6;
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 2;
+}
+
+/* ---------- Diálogos ---------- */
+.dialog-pane,
+.dialogo {
+    -fx-background-color: -pos-elevada;
+    -fx-border-color: -pos-borde;
+    -fx-border-width: 1;
+    -fx-padding: 12;
+}
+
+.dialog-pane > .content.label {
+    -fx-text-fill: -pos-texto;
+    -fx-font-size: 17px;
+    -fx-padding: 16 8 16 8;
+}
+
+.dialog-pane .header-panel {
+    -fx-background-color: -pos-superficie;
+}
+
+.dialog-pane > .button-bar > .container {
+    -fx-background-color: transparent;
+}
+
+/* ---------- Gráficas ---------- */
+.chart-plot-background {
+    -fx-background-color: -pos-superficie;
+}
+
+.chart-vertical-grid-lines,
+.chart-horizontal-grid-lines {
+    -fx-stroke: -pos-borde;
+}
+
+.axis {
+    -fx-tick-label-fill: -pos-texto-sec;
+}
+
+.chart-bar {
+    -fx-bar-fill: -pos-acento;
+}
+
+.chart-title,
+.chart-legend .label {
+    -fx-text-fill: -pos-texto;
+}
+
+/* ---------- Toast ---------- */
+.toast {
+    -fx-background-color: -pos-superficie;
+    -fx-border-color: -pos-exito;
+    -fx-border-width: 0 0 0 5;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-padding: 14 22 14 18;
+    -fx-text-fill: -pos-texto;
+    -fx-font-size: 16px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 18, 0.2, 0, 4);
+}

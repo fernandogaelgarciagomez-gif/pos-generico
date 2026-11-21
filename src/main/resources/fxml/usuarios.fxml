@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Usuarios (21-usuarios-y-permisos.md). Solo admin. -->
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:id="raiz" fx:controller="com.fgsistemas.pos.controller.UsuariosController">
+    <top>
+        <fx:include fx:id="barraSuperior" source="barra-superior.fxml"/>
+    </top>
+
+    <center>
+        <VBox spacing="16">
+            <padding>
+                <Insets top="24" right="32" bottom="24" left="32"/>
+            </padding>
+            <Label text="Usuarios" styleClass="titulo"/>
+            <TableView fx:id="tabla" VBox.vgrow="ALWAYS">
+                <columnResizePolicy>
+                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                </columnResizePolicy>
+                <placeholder>
+                    <Label text="No hay usuarios"/>
+                </placeholder>
+                <columns>
+                    <TableColumn fx:id="colNombre" text="Nombre" prefWidth="320"/>
+                    <TableColumn fx:id="colUsuario" text="Usuario" prefWidth="200"/>
+                    <TableColumn fx:id="colRol" text="Rol" prefWidth="180"/>
+                    <TableColumn fx:id="colActivo" text="Activo" prefWidth="120"/>
+                    <TableColumn fx:id="colCreado" text="Creado" prefWidth="200"/>
+                </columns>
+            </TableView>
+        </VBox>
+    </center>
+
+    <bottom>
+        <FlowPane fx:id="barraAcciones" styleClass="barra-acciones"/>
+    </bottom>
+</BorderPane>

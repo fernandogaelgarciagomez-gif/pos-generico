@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Inventario (15-inventario.md) -->
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:id="raiz" fx:controller="com.fgsistemas.pos.controller.InventarioController">
+    <top>
+        <fx:include source="barra-superior.fxml"/>
+    </top>
+
+    <center>
+        <VBox spacing="12">
+            <padding>
+                <Insets top="20" right="32" bottom="16" left="32"/>
+            </padding>
+            <Label text="Inventario" styleClass="titulo"/>
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <TextField fx:id="txtBuscar" promptText="Buscar por código, nombre o categoría (F2)"
+                           HBox.hgrow="ALWAYS"/>
+                <ComboBox fx:id="cmbCategoria" prefWidth="240"/>
+                <CheckBox fx:id="chkStockBajo" text="Solo stock bajo (F5)"/>
+                <CheckBox fx:id="chkInactivos" text="Mostrar inactivos"/>
+            </HBox>
+            <TableView fx:id="tabla" VBox.vgrow="ALWAYS">
+                <placeholder>
+                    <Label text="No hay productos. Agrega uno con Nuevo (Ins/Ctrl+N)."/>
+                </placeholder>
+            </TableView>
+            <Label fx:id="lblPie" styleClass="pie-tabla"/>
+        </VBox>
+    </center>
+
+    <bottom>
+        <FlowPane fx:id="barraAcciones" styleClass="barra-acciones"/>
+    </bottom>
+</BorderPane>

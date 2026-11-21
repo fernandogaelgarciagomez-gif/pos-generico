@@ -1,0 +1,23 @@
+# Build
+target/
+
+# Datos locales (la BD real vive en %LOCALAPPDATA%\FGSistemas\POS, pero por si acaso)
+data/
+*.db
+*.db-journal
+*.log
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# Sistema
+Thumbs.db
+Desktop.ini
+
+# Claude Code (configuración local)
+.claude/settings.local.json

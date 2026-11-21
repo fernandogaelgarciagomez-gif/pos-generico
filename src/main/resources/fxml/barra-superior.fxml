@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+
+<!-- Barra superior común (03-diseno-ui.md): negocio, usuario y rol, turno, fecha/hora. Ctrl+P cambia contraseña. -->
+<HBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:id="barra" styleClass="barra-superior"
+      fx:controller="com.fgsistemas.pos.controller.BarraSuperiorController">
+    <Label fx:id="lblNegocio" styleClass="barra-negocio"/>
+    <Label fx:id="lblUsuario" styleClass="texto-secundario"/>
+    <Label fx:id="lblTurno" styleClass="texto-secundario"/>
+    <Region HBox.hgrow="ALWAYS"/>
+    <HBox fx:id="zonaAcciones" spacing="8" alignment="CENTER"/>
+    <Label fx:id="lblReloj" styleClass="barra-reloj"/>
+</HBox>

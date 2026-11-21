@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<!--
+  DECISION: "Abrir turno" se muestra como pantalla con tarjeta centrada (no diálogo flotante):
+  mismo efecto (obligatorio, Esc regresa al login) y más simple de manejar con teclado.
+-->
+<StackPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+           fx:id="raiz" fx:controller="com.fgsistemas.pos.controller.TurnoController">
+
+    <!-- Abrir turno nuevo -->
+    <VBox fx:id="tarjetaAbrir" styleClass="tarjeta, tarjeta-login" spacing="10" maxHeight="-Infinity"
+          visible="false" managed="false">
+        <Label text="Abrir turno" styleClass="titulo"/>
+        <Label fx:id="lblSaludo" styleClass="texto-secundario" wrapText="true"/>
+        <Label text="¿Con cuánto efectivo inicias la caja?" wrapText="true"/>
+        <TextField fx:id="txtFondo" styleClass="campo-grande" promptText="0.00"/>
+        <Label fx:id="lblErrorFondo" styleClass="texto-error" minHeight="20"/>
+        <Button fx:id="btnAbrir" text="Abrir turno (Enter)" maxWidth="Infinity" onAction="#abrirTurno"/>
+        <Button text="Regresar al inicio de sesión (Esc)" styleClass="boton-secundario" maxWidth="Infinity"
+                focusTraversable="false" onAction="#regresar"/>
+    </VBox>
+
+    <!-- Hay un turno abierto de otro usuario -->
+    <VBox fx:id="tarjetaOtro" styleClass="tarjeta, tarjeta-login" spacing="12" maxHeight="-Infinity"
+          visible="false" managed="false">
+        <Label text="Turno abierto" styleClass="titulo"/>
+        <Label fx:id="lblTurnoOtro" wrapText="true"/>
+        <Label fx:id="lblTurnoFondo" styleClass="texto-secundario" wrapText="true"/>
+        <Button fx:id="btnContinuar" text="1 · Continuar con ese turno" maxWidth="Infinity"
+                onAction="#continuarTurno"/>
+        <Button fx:id="btnCorte" text="2 · Hacer corte de ese turno y abrir uno nuevo" maxWidth="Infinity"
+                styleClass="boton-secundario" onAction="#cortarYAbrir" wrapText="true"/>
+        <Button text="Regresar al inicio de sesión (Esc)" styleClass="boton-secundario" maxWidth="Infinity"
+                focusTraversable="false" onAction="#regresar"/>
+    </VBox>
+</StackPane>
