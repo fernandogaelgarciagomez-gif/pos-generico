@@ -116,25 +116,39 @@ public class VentaDao {
 
     // ---------------------------------------------------------------- consultas
 
+    private static final String SELECT_RESUMEN =
+            "SELECT v.id, v.folio, v.fecha, u.nombre, cl.nombre, v.total, v.estado, "
+                    + "(SELECT GROUP_CONCAT(p.metodo, ',') FROM venta_pagos p WHERE p.venta_id = v.id), "
+                    + "v.motivo_cancelacion "
+                    + "FROM ventas v JOIN usuarios u ON u.id = v.usuario_id "
+                    + "LEFT JOIN clientes cl ON cl.id = v.cliente_id ";
+
     public List<Venta.Resumen> listarDelTurno(Connection c, long turnoId) throws SQLException {
         List<Venta.Resumen> lista = new ArrayList<>();
-        try (PreparedStatement ps = c.prepareStatement(
-                "SELECT v.id, v.folio, v.fecha, u.nombre, cl.nombre, v.total, v.estado, "
-                        + "(SELECT GROUP_CONCAT(p.metodo, ',') FROM venta_pagos p WHERE p.venta_id = v.id), "
-                        + "v.motivo_cancelacion "
-                        + "FROM ventas v JOIN usuarios u ON u.id = v.usuario_id "
-                        + "LEFT JOIN clientes cl ON cl.id = v.cliente_id "
-                        + "WHERE v.turno_id = ? ORDER BY v.folio DESC")) {
+        try (PreparedStatement ps = c.prepareStatement(SELECT_RESUMEN + "WHERE v.turno_id = ? ORDER BY v.folio DESC")) {
             ps.setLong(1, turnoId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    lista.add(new Venta.Resumen(rs.getLong(1), rs.getLong(2), Fechas.deTexto(rs.getString(3)),
-                            rs.getString(4), rs.getString(5), rs.getLong(6), rs.getString(7),
-                            metodosTexto(rs.getString(8)), rs.getString(9)));
+                    lista.add(resumen(rs));
                 }
             }
         }
         return lista;
+    }
+
+    public Optional<Venta.Resumen> resumen(Connection c, long ventaId) throws SQLException {
+        try (PreparedStatement ps = c.prepareStatement(SELECT_RESUMEN + "WHERE v.id = ?")) {
+            ps.setLong(1, ventaId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? Optional.of(resumen(rs)) : Optional.empty();
+            }
+        }
+    }
+
+    private static Venta.Resumen resumen(ResultSet rs) throws SQLException {
+        return new Venta.Resumen(rs.getLong(1), rs.getLong(2), Fechas.deTexto(rs.getString(3)),
+                rs.getString(4), rs.getString(5), rs.getLong(6), rs.getString(7),
+                metodosTexto(rs.getString(8)), rs.getString(9));
     }
 
     private static String metodosTexto(String metodos) {

@@ -50,7 +50,7 @@ public class MenuController {
             new Opcion(4, "Resumen del día", "mdi2c-chart-bar", Permiso.VER_RESUMEN_DIA, null, 7),
             new Opcion(5, "Corte de caja", "mdi2c-cash-register", Permiso.HACER_CORTE, null, 7),
             new Opcion(6, "Cortes pasados", "mdi2h-history", Permiso.VER_CORTES_PASADOS, null, 7),
-            new Opcion(7, "Fiados / Clientes", "mdi2a-account-cash", Permiso.FIADOS_VENDER, null, 6),
+            new Opcion(7, "Fiados / Clientes", "mdi2a-account-cash", Permiso.FIADOS_VENDER, "fiados", 0),
             new Opcion(8, "Usuarios", "mdi2a-account-multiple", Permiso.USUARIOS, "usuarios", 0),
             new Opcion(9, "Configuración", "mdi2c-cog", Permiso.CONFIGURACION, null, 8));
 

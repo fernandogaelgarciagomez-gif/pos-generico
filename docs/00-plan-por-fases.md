@@ -10,8 +10,8 @@ Trabaja una fase a la vez. No avances sin que compile, corra y cumpla los criter
 | 3 Menú y usuarios | ✅ Verificada | + botones visibles y contador de ventas (pedido del cliente) |
 | 4 Inventario y entradas | ✅ Verificada | + categoría nueva desde el formulario |
 | 5 Vender y cancelaciones | ✅ Verificada | Vender con mosaicos de iniciales; clientes solo alta rápida |
-| 6 Fiados | ⏳ Siguiente | |
-| 7 Resumen y cortes | Pendiente | |
+| 6 Fiados | ✅ Verificada | Saldo a favor se usa en la siguiente venta a fiado; ver decisiones 31–39 |
+| 7 Resumen y cortes | ⏳ Siguiente | |
 | 8 Configuración y respaldos | Pendiente | |
 | 9 Pulido | Pendiente | Incluye devolución parcial (24-cancelaciones) |
 

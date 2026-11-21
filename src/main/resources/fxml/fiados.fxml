@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Fiados y clientes (20-fiados-clientes.md) -->
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:id="raiz" fx:controller="com.fgsistemas.pos.controller.FiadosController">
+    <top>
+        <fx:include source="barra-superior.fxml"/>
+    </top>
+
+    <center>
+        <VBox spacing="12">
+            <padding>
+                <Insets top="20" right="32" bottom="16" left="32"/>
+            </padding>
+            <Label text="Fiados / Clientes" styleClass="titulo"/>
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <TextField fx:id="txtBuscar" promptText="Buscar por nombre o teléfono (F2)" HBox.hgrow="ALWAYS"/>
+                <CheckBox fx:id="chkConAdeudo" text="Solo con adeudo (F5)" selected="true"/>
+                <CheckBox fx:id="chkInactivos" text="Mostrar inactivos"/>
+            </HBox>
+            <TableView fx:id="tabla" VBox.vgrow="ALWAYS"/>
+            <HBox spacing="24" alignment="CENTER_LEFT">
+                <Label fx:id="lblPie" styleClass="pie-tabla" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                <Label fx:id="lblTotal" styleClass="subtitulo"/>
+            </HBox>
+        </VBox>
+    </center>
+
+    <bottom>
+        <FlowPane fx:id="barraAcciones" styleClass="barra-acciones"/>
+    </bottom>
+</BorderPane>

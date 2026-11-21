@@ -1,5 +1,9 @@
 package com.fgsistemas.pos.model;
 
+import com.fgsistemas.pos.util.Dinero;
+
+import java.time.LocalDateTime;
+
 /** Cliente (para fiados). Saldo en centavos: lo que debe (negativo = saldo a favor). */
 public class Cliente {
 
@@ -9,6 +13,33 @@ public class Cliente {
     private String notas;
     private long saldo;
     private boolean activo = true;
+    private LocalDateTime ultimaCompra;
+    private LocalDateTime ultimoAbono;
+
+    public LocalDateTime getUltimaCompra() {
+        return ultimaCompra;
+    }
+
+    public void setUltimaCompra(LocalDateTime ultimaCompra) {
+        this.ultimaCompra = ultimaCompra;
+    }
+
+    public LocalDateTime getUltimoAbono() {
+        return ultimoAbono;
+    }
+
+    public void setUltimoAbono(LocalDateTime ultimoAbono) {
+        this.ultimoAbono = ultimoAbono;
+    }
+
+    /** "$150.00", o "A favor $50.00" si el saldo es negativo. */
+    public String saldoTexto() {
+        return textoSaldo(saldo);
+    }
+
+    public static String textoSaldo(long saldo) {
+        return saldo < 0 ? "A favor " + Dinero.formatear(-saldo) : Dinero.formatear(saldo);
+    }
 
     public long getId() {
         return id;

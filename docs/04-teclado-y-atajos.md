@@ -90,5 +90,8 @@ usuario admin → contraseña → Enter.
   `Esc` cancelar la captura / salir (confirma si hay renglones).
 - **Usuarios**: `Ins`/`Ctrl+N` nuevo, `Enter` editar, `R` restablecer contraseña, `Supr` desactivar,
   `Ctrl+P` cambiar mi contraseña, `Esc` menú.
-- **Fiados** (Fase 6): `F2` buscar cliente, `Ins`/`Ctrl+N` nuevo cliente, `A` abonar, `H` historial.
+- **Fiados**: `F2` buscar cliente, `Ins`/`Ctrl+N` nuevo cliente, `A` abonar, `H` historial,
+  `F5` solo con adeudo, `Esc` menú (o limpiar la búsqueda). Admin: `Enter` editar, `Supr` desactivar/reactivar
+  (cajero: `Enter` abre el historial). En Abonar: `E` / `T` / `R` método, `L` liquidar todo, `Enter` confirma.
+  En el historial: `Enter` ver productos de la venta, `F7` PDF, `Shift+F7` Excel.
 - **Cortes pasados** (Fase 7): flechas para elegir, `Enter` ver detalle, `F7` exportar a Excel.

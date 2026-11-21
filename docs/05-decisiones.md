@@ -64,3 +64,22 @@ Este archivo **manda** sobre el resto de los docs si hay contradicción.
     completa de fiados es la Fase 6.
 30. **Muchas categorías**: los chips de Vender ocupan como máximo ~2 filas; el resto se ve con scroll
     (no empujan los mosaicos). Nombres muy largos se cortan con "…" y el completo sale en el tooltip.
+
+## Fase 6 (Fiados)
+31. **Saldo a favor** (queda al cancelar una venta fiada que ya tenía abonos): se descuenta solo en la
+    siguiente venta **a fiado** del cliente (el saldo es un acumulado). No se puede abonar ni desactivar
+    al cliente mientras tenga saldo a favor. Devolverlo en efectivo será un retiro de caja (Fase 7).
+    En pantalla se muestra como "A favor $X" (en verde).
+32. **Ventas canceladas en el estado de cuenta**: aparecen tachadas y no mueven el saldo acumulado.
+    La verificación del saldo (Σ parte fiada de ventas completadas − Σ abonos) también las excluye.
+33. **Pago mixto**: el cargo en el estado de cuenta es solo la parte fiada, no el total de la venta.
+34. **Desactivar cliente** solo con saldo exactamente $0 (ni deuda ni saldo a favor). Se reactiva con
+    `Supr` activando "Mostrar inactivos" (solo admin).
+35. **Métodos de abono**: efectivo siempre; tarjeta y transferencia solo si están habilitados en el negocio.
+36. **Foco inicial en la tabla** de Fiados para que `A` / `H` funcionen de inmediato (si la lista está
+    vacía, en el buscador). `Enter` en la tabla: admin edita; el cajero (que no edita) abre el historial.
+37. **Exportar estado de cuenta**: `F7` a PDF (para WhatsApp) y `Shift+F7` a Excel, en la carpeta de
+    exportaciones. Desde el historial, `Enter` en una venta muestra sus productos (solo lectura: las
+    cancelaciones se hacen desde Vender).
+38. **Notas del cliente** en un campo de una línea (Enter avanza/guarda como en todo formulario).
+39. Un cliente nuevo creado desde Fiados desactiva el filtro "Solo con adeudo" para que se vea en la lista.

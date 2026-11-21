@@ -674,6 +674,21 @@
     -fx-strikethrough: true;
 }
 
+/* Fiados: saldo que debe (rojo) o a favor (verde) */
+.table-row-cell .table-cell.saldo-deudor {
+    -fx-text-fill: -pos-peligro;
+    -fx-font-weight: bold;
+}
+
+.table-row-cell .table-cell.saldo-favor {
+    -fx-text-fill: -pos-exito;
+}
+
+.table-row-cell:selected .table-cell.saldo-deudor,
+.table-row-cell:selected .table-cell.saldo-favor {
+    -fx-text-fill: -pos-texto;
+}
+
 .table-view .placeholder .label {
     -fx-text-fill: -pos-texto-sec;
 }

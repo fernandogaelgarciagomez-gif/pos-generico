@@ -224,8 +224,8 @@ final class VentaDialogos {
                 lblClienteFiado.setText("Sin cliente. Elige uno con F4 para poder fiar.");
                 lblClienteMixto.setText("Cliente: ninguno (F4 si hay parte fiada)");
             } else {
-                lblClienteFiado.setText("Cliente: " + c.getNombre() + "\nDebe hoy: " + Dinero.formatear(c.getSaldo())
-                        + "   →   después de esta venta: " + Dinero.formatear(c.getSaldo() + total));
+                lblClienteFiado.setText("Cliente: " + c.getNombre() + "\nSaldo hoy: " + c.saldoTexto()
+                        + "   →   después de esta venta: " + Cliente.textoSaldo(c.getSaldo() + total));
                 lblClienteMixto.setText("Cliente: " + c.getNombre() + " (F4 para cambiar)");
             }
         };
@@ -492,7 +492,7 @@ final class VentaDialogos {
         TableView<Cliente> tabla = Tablas.tabla("Sin clientes. Crea uno con \"Nuevo cliente\" (Ins/Ctrl+N).");
         tabla.getColumns().add(Tablas.col("Nombre", 300, Cliente::getNombre));
         tabla.getColumns().add(Tablas.col("Teléfono", 160, c -> c.getTelefono() == null ? "" : c.getTelefono()));
-        tabla.getColumns().add(Tablas.colDerecha("Debe", 130, c -> Dinero.formatear(c.getSaldo())));
+        tabla.getColumns().add(Tablas.colDerecha("Saldo", 150, Cliente::saldoTexto));
         tabla.setItems(filtrados);
         txt.textProperty().addListener((o, a, n) -> {
             filtrados.setPredicate(c -> n.isBlank() || Texto.contieneTodas(c.getNombre() + " "
@@ -800,7 +800,7 @@ final class VentaDialogos {
         boolean[] huboCancelacion = new boolean[1];
         Runnable verDetalle = () -> {
             Venta.Resumen sel = tabla.getSelectionModel().getSelectedItem();
-            if (sel != null && detalleVenta(servicio, sel)) {
+            if (sel != null && detalleVenta(servicio, sel, true)) {
                 huboCancelacion[0] = true;
                 cargar.run();
             }
@@ -834,8 +834,20 @@ final class VentaDialogos {
         return huboCancelacion[0];
     }
 
+    /** Detalle de una venta de solo lectura (p. ej. desde el estado de cuenta de un cliente). */
+    static void verVenta(long ventaId) {
+        VentaService servicio = new VentaService();
+        try {
+            detalleVenta(servicio, servicio.resumen(ventaId), false);
+        } catch (SQLException e) {
+            Flujo.errorDatos(e);
+        } catch (IllegalArgumentException | PermisoDenegadoException e) {
+            Alertas.advertencia(e.getMessage());
+        }
+    }
+
     /** Detalle de una venta. @return true si se canceló desde aquí. */
-    private static boolean detalleVenta(VentaService servicio, Venta.Resumen v) {
+    private static boolean detalleVenta(VentaService servicio, Venta.Resumen v, boolean permitirCancelar) {
         List<Venta.Renglon> renglones;
         List<Venta.Pago> pagos;
         try {
@@ -876,7 +888,7 @@ final class VentaDialogos {
 
         boolean[] cancelada = new boolean[1];
         List<Button> extras = new ArrayList<>();
-        if (!v.cancelada()) {
+        if (permitirCancelar && !v.cancelada()) {
             Button btn = Acciones.boton("Cancelar esta venta", "C", () -> { });
             btn.getStyleClass().add("boton-peligro");
             Runnable accion = () -> {

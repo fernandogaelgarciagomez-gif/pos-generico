@@ -238,6 +238,13 @@ public class VentaService {
         }
     }
 
+    public Venta.Resumen resumen(long ventaId) throws SQLException {
+        Sesion.requiere(Permiso.VENDER);
+        try (Connection c = Database.conectar()) {
+            return ventaDao.resumen(c, ventaId).orElseThrow(() -> new IllegalArgumentException("La venta no existe."));
+        }
+    }
+
     public List<Venta.Renglon> renglones(long ventaId) throws SQLException {
         Sesion.requiere(Permiso.VENDER);
         try (Connection c = Database.conectar()) {
