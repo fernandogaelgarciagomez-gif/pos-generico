@@ -21,7 +21,7 @@ mvn test
 
 ## Datos
 La base de datos, respaldos, logs e imágenes viven en `%LOCALAPPDATA%\FGSistemas\POS\`
-(fuera del proyecto y de OneDrive). Las exportaciones a Excel van a
+(fuera del proyecto y de OneDrive). Las exportaciones (Excel y PDF) van a
 `Documentos\Punto de Venta\Exportaciones\`.
 
 ## Contenido

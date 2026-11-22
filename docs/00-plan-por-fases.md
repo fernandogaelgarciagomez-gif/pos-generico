@@ -59,6 +59,7 @@ Las decisiones tomadas en el camino están en `docs/05-decisiones.md`.
 - `17-resumen-del-dia.md`
 - `18-corte-de-caja.md`
 - `19-cortes-pasados.md`
+- `25-gastos-e-ingresos.md` (agregado a pedido del cliente al cerrar la fase)
 - ✅ Criterio: el corte cuadra fondo + efectivo + abonos − retiros contra lo contado
 
 ## Fase 8 — Configuración y respaldos

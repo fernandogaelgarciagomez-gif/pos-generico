@@ -16,6 +16,7 @@ papelería, abarrotes, tienda de ropa, etc.). Una sola caja, sin hardware por ah
 - **jBCrypt** (`org.mindrot:jbcrypt`) para hashear contraseñas
 - **Apache POI** (`poi-ooxml`) para exportar a Excel
 - **OpenPDF** (`com.github.librepdf:openpdf`) para exportar a PDF (corte, estado de cuenta)
+- **Ikonli** (`ikonli-javafx` + `ikonli-materialdesign2-pack`) para los íconos del menú
 - **JUnit 5** para pruebas de servicios (cuadre de corte, saldos, cantidades)
 - Sin frameworks pesados (nada de Spring). JDBC directo con DAOs.
 
@@ -62,7 +63,7 @@ src/main/java/com/fgsistemas/pos/
 src/main/resources/
   fxml/                    -> una vista por pantalla
   css/tema-azul-marino.css
-  img/
+  img/                     -> (aún no existe; se crea cuando haya imágenes propias)
 src/test/java/...          -> pruebas JUnit 5 de servicios
 ```
 (La BD, respaldos y logs viven en `%LOCALAPPDATA%\FGSistemas\POS\`, no en el proyecto.)

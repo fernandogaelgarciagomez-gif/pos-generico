@@ -44,7 +44,7 @@
 
     <bottom>
         <FlowPane fx:id="barraAcciones" styleClass="barra-acciones">
-            <Label text="Clic o F1–F9 para abrir  ·  Flechas para moverte  ·  Enter abrir" styleClass="pie-tabla"/>
+            <Label text="Clic o F1–F10 para abrir  ·  Flechas para moverte  ·  Enter abrir" styleClass="pie-tabla"/>
         </FlowPane>
     </bottom>
 </BorderPane>

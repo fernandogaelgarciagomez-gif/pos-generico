@@ -117,3 +117,4 @@ Este archivo **manda** sobre el resto de los docs si hay contradicción.
     `F8` en Vender (gasto = retiro, ingreso = entrada) y entran al corte. Categorías rápidas (teclas 1–9 con el
     foco en la categoría) + detalle; el detalle es obligatorio en "Otro". Los gastos del cajero piden
     autorización de admin (igual que los retiros). No se borran: un error se corrige con el movimiento contrario.
+    Especificación: `docs/modulos/25-gastos-e-ingresos.md`.
