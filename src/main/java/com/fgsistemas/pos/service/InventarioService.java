@@ -115,6 +115,60 @@ public class InventarioService {
         });
     }
 
+    /** Categorías con cuántos productos usan cada una (Configuración → Inventario). */
+    public List<CategoriaDao.ConConteo> categoriasConConteo() throws SQLException {
+        Sesion.requiere(Permiso.EDITAR_INVENTARIO);
+        try (Connection c = Database.conectar()) {
+            return categoriaDao.listarConConteo(c);
+        }
+    }
+
+    public void renombrarCategoria(long categoriaId, String nombre) throws SQLException {
+        Sesion.requiere(Permiso.EDITAR_INVENTARIO);
+        if (nombre == null || nombre.isBlank()) {
+            throw new IllegalArgumentException("Escribe el nombre de la categoría.");
+        }
+        String limpio = nombre.trim();
+        if (limpio.length() > 60) {
+            throw new IllegalArgumentException("Máximo 60 caracteres.");
+        }
+        long usuarioId = Sesion.usuario().getId();
+        Database.enTransaccion(c -> {
+            CategoriaDao.ConConteo actual = categoriaDao.buscar(c, categoriaId)
+                    .orElseThrow(() -> new IllegalArgumentException("La categoría ya no existe."));
+            if (categoriaDao.existeNombre(c, limpio, categoriaId)) {
+                throw new IllegalArgumentException("Ya existe una categoría llamada \"" + limpio + "\".");
+            }
+            if (!actual.nombre().equals(limpio)) {
+                categoriaDao.renombrar(c, categoriaId, limpio);
+                bitacoraDao.registrar(c, usuarioId, "CATEGORIA_RENOMBRADA", actual.nombre() + " → " + limpio);
+            }
+            return null;
+        });
+    }
+
+    /**
+     * Quita una categoría que ningún producto usa.
+     * DECISION: en vez de "desactivar" (que pediría una columna nueva y filtrar en Vender e Inventario),
+     * solo se puede quitar una categoría vacía; con productos, primero hay que cambiarlos de categoría.
+     */
+    public void quitarCategoria(long categoriaId) throws SQLException {
+        Sesion.requiere(Permiso.EDITAR_INVENTARIO);
+        long usuarioId = Sesion.usuario().getId();
+        Database.enTransaccion(c -> {
+            CategoriaDao.ConConteo actual = categoriaDao.buscar(c, categoriaId)
+                    .orElseThrow(() -> new IllegalArgumentException("La categoría ya no existe."));
+            if (actual.productos() > 0) {
+                throw new IllegalStateException("\"" + actual.nombre() + "\" tiene " + actual.productos()
+                        + (actual.productos() == 1 ? " producto" : " productos")
+                        + ". Cámbialos de categoría en Inventario antes de quitarla.");
+            }
+            categoriaDao.eliminar(c, categoriaId);
+            bitacoraDao.registrar(c, usuarioId, "CATEGORIA_QUITADA", actual.nombre());
+            return null;
+        });
+    }
+
     public int contarStockBajo() throws SQLException {
         Sesion.requiere(Permiso.VER_INVENTARIO);
         try (Connection c = Database.conectar()) {

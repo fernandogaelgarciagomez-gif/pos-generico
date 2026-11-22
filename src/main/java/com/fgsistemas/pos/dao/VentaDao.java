@@ -136,6 +136,23 @@ public class VentaDao {
         return lista;
     }
 
+    /** Ventas (completadas y canceladas) con fecha entre {@code desde} y {@code hasta}, ambos incluidos. */
+    public List<Venta.Resumen> listarRango(Connection c, java.time.LocalDate desde, java.time.LocalDate hasta)
+            throws SQLException {
+        List<Venta.Resumen> lista = new ArrayList<>();
+        try (PreparedStatement ps = c.prepareStatement(SELECT_RESUMEN
+                + "WHERE v.fecha >= ? AND v.fecha < ? ORDER BY v.folio")) {
+            ps.setString(1, Fechas.aTexto(desde.atStartOfDay()));
+            ps.setString(2, Fechas.aTexto(hasta.plusDays(1).atStartOfDay()));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(resumen(rs));
+                }
+            }
+        }
+        return lista;
+    }
+
     public Optional<Venta.Resumen> resumen(Connection c, long ventaId) throws SQLException {
         try (PreparedStatement ps = c.prepareStatement(SELECT_RESUMEN + "WHERE v.id = ?")) {
             ps.setLong(1, ventaId);

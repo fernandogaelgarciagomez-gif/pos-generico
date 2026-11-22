@@ -45,4 +45,37 @@ public class NegocioDao {
             ps.executeUpdate();
         }
     }
+
+    /** Guarda los datos y la configuración editables desde Configuración (Fase 8). */
+    public void actualizar(Connection c, Negocio n) throws SQLException {
+        try (PreparedStatement ps = c.prepareStatement("UPDATE negocio SET nombre = ?, direccion = ?, telefono = ?, "
+                + "rfc = ?, mensaje_ticket = ?, stock_minimo_default = ?, permitir_stock_negativo = ?, "
+                + "metodo_tarjeta = ?, metodo_transferencia = ?, metodo_fiado = ?, descuento_maximo_pct = ?, "
+                + "respaldo_automatico = ?, dias_conservar_respaldos = ? WHERE id = 1")) {
+            ps.setString(1, n.getNombre().trim());
+            ps.setString(2, Dao.vacioANulo(n.getDireccion()));
+            ps.setString(3, Dao.vacioANulo(n.getTelefono()));
+            ps.setString(4, Dao.vacioANulo(n.getRfc()));
+            ps.setString(5, Dao.vacioANulo(n.getMensajeTicket()));
+            ps.setLong(6, n.getStockMinimoDefault());
+            ps.setInt(7, n.isPermitirStockNegativo() ? 1 : 0);
+            ps.setInt(8, n.isMetodoTarjeta() ? 1 : 0);
+            ps.setInt(9, n.isMetodoTransferencia() ? 1 : 0);
+            ps.setInt(10, n.isMetodoFiado() ? 1 : 0);
+            ps.setInt(11, n.getDescuentoMaximoPct());
+            ps.setInt(12, n.isRespaldoAutomatico() ? 1 : 0);
+            ps.setInt(13, n.getDiasConservarRespaldos());
+            if (ps.executeUpdate() != 1) {
+                throw new SQLException("No existe la fila del negocio.");
+            }
+        }
+    }
+
+    /** Ruta del logo relativa a la carpeta de datos (ej. "img/logo.png"), o null para quitarlo. */
+    public void actualizarLogo(Connection c, String logoPath) throws SQLException {
+        try (PreparedStatement ps = c.prepareStatement("UPDATE negocio SET logo_path = ? WHERE id = 1")) {
+            ps.setString(1, logoPath);
+            ps.executeUpdate();
+        }
+    }
 }

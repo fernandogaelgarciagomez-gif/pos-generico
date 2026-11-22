@@ -45,13 +45,7 @@ public class BarraSuperiorController {
 
     @FXML
     private void initialize() {
-        String negocio = AppConfig.NOMBRE_APP;
-        try {
-            negocio = new NegocioService().obtener().map(n -> n.getNombre()).orElse(negocio);
-        } catch (SQLException e) {
-            // La barra no debe impedir abrir la pantalla.
-        }
-        lblNegocio.setText(negocio);
+        actualizarNegocio();
         actualizarUsuario();
 
         Turno t = Sesion.turno();
@@ -73,6 +67,16 @@ public class BarraSuperiorController {
         // DECISION (cliente): "Cambiar contraseña" ya no va en la barra; vive en la pantalla Usuarios.
     }
 
+    private void actualizarNegocio() {
+        String negocio = AppConfig.NOMBRE_APP;
+        try {
+            negocio = new NegocioService().obtener().map(n -> n.getNombre()).orElse(negocio);
+        } catch (SQLException e) {
+            // La barra no debe impedir abrir la pantalla.
+        }
+        lblNegocio.setText(negocio);
+    }
+
     private void actualizarUsuario() {
         Usuario u = Sesion.usuario();
         lblUsuario.setText(u == null ? "" : u.getNombre() + " · " + u.getRol().etiqueta());
@@ -83,8 +87,9 @@ public class BarraSuperiorController {
         lblReloj.setText(Character.toUpperCase(texto.charAt(0)) + texto.substring(1));
     }
 
-    /** Para pantallas que necesiten refrescar la barra (p. ej. al editar el propio nombre). */
+    /** Para pantallas que necesiten refrescar la barra (p. ej. al editar el propio nombre o el del negocio). */
     public void refrescar() {
+        actualizarNegocio();
         actualizarUsuario();
     }
 

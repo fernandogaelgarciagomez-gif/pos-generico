@@ -118,3 +118,21 @@ Este archivo **manda** sobre el resto de los docs si hay contradicción.
     foco en la categoría) + detalle; el detalle es obligatorio en "Otro". Los gastos del cajero piden
     autorización de admin (igual que los retiros). No se borran: un error se corrige con el movimiento contrario.
     Especificación: `docs/modulos/25-gastos-e-ingresos.md`.
+
+## Fase 8 (Configuración y respaldos)
+52. **Un solo "Guardar" (`Ctrl+S`)** en la barra inferior guarda todas las pestañas de Configuración a la vez
+    (en vez de un botón por pestaña). El logo, las categorías y los respaldos se aplican al momento.
+    `Esc` con cambios sin guardar pide confirmación. Cada guardado deja en bitácora qué cambió.
+53. **Categorías**: se crean, se renombran y se **quitan solo si ningún producto las usa** (en vez de
+    "desactivar", que pediría una columna nueva y filtrarlas en Vender e Inventario).
+54. **Logo**: se copia a `img/logo.png` en la carpeta de datos (PNG o JPG, máximo 5 MB) y se ve en el login.
+55. **Respaldos** con nombre `pos_AAAA-MM-DD_HHmm[_motivo].db` (`_corte` después de un corte,
+    `_antes-de-restaurar` antes de restaurar). La limpieza por días **nunca borra el respaldo más reciente**
+    y no toca archivos con otro nombre. Si el respaldo automático falla, el admin ve el aviso al entrar al menú.
+56. **Restaurar** revisa antes que el archivo sea una BD íntegra del sistema (integridad, tablas, versión no
+    más nueva, con un admin activo); la palabra `RESTAURAR` se acepta en mayúsculas o minúsculas. También se
+    puede restaurar desde un archivo (`Ctrl+O`, p. ej. una USB). Al terminar se cierra la sesión.
+57. **Exportar todo a Excel** usa el mes en curso para ventas y cortes; productos y clientes, todos
+    (incluidos inactivos).
+58. Los servicios ubican las carpetas `respaldos\` e `img\` junto a la BD abierta (en la app es
+    `%LOCALAPPDATA%\FGSistemas\POS\`); así las pruebas nunca tocan los datos reales.

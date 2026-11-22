@@ -15,6 +15,12 @@ public final class AppConfig {
 
     public static final String NOMBRE_APP = "Punto de Venta";
     public static final String DESARROLLADOR = "FG Sistemas";
+    /**
+     * Contacto del desarrollador para "Acerca de" (22-configuracion.md: configurable en código).
+     * DECISION: vacíos hasta que FG Sistemas dé sus datos; si están vacíos no se muestran.
+     */
+    public static final String CONTACTO_TELEFONO = "";
+    public static final String CONTACTO_CORREO = "";
 
     /** Propiedad de sistema para cambiar la carpeta de datos (pruebas, instalaciones especiales). */
     public static final String PROP_CARPETA_DATOS = "pos.datos";

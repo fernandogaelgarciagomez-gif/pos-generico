@@ -100,5 +100,9 @@ usuario admin → contraseña → Enter.
 - **Corte de caja**: Paso 1 contar (`D` total o por denominación, Tab entre denominaciones, `Enter` continuar,
   `Esc` regresar); Paso 2 resultado (`Enter` cerrar turno, `Esc` regresar al conteo); Paso 3 `F7` PDF,
   `Shift+F7` Excel, `Enter` terminar.
+- **Configuración** (admin): `Ctrl+Tab` / `Ctrl+Shift+Tab` cambian de pestaña, `Ctrl+S` guarda todas las
+  pestañas, `Esc` menú (confirma si hay cambios). Negocio: `Ctrl+L` elegir logo, `Ctrl+Shift+L` quitarlo.
+  Inventario: `Ins`/`Ctrl+N` nueva categoría, `Enter` renombrar, `Supr` quitar. Respaldos: `F5` respaldar ahora,
+  `F6` en otra ubicación, `R` restaurar el seleccionado, `Ctrl+O` restaurar desde archivo, `F7` exportar todo.
 - **Cortes pasados**: `H` hoy, `S` esta semana, `M` este mes, flechas para elegir, `Enter` ver detalle,
   `F7` exportar a Excel. En el detalle: `Enter` ver la venta, `F7` Excel, `Shift+F7` PDF.

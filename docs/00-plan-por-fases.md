@@ -12,8 +12,8 @@ Trabaja una fase a la vez. No avances sin que compile, corra y cumpla los criter
 | 5 Vender y cancelaciones | ✅ Verificada | Vender con mosaicos de iniciales; clientes solo alta rápida |
 | 6 Fiados | ✅ Verificada | Saldo a favor se usa en la siguiente venta a fiado; ver decisiones 31–39 |
 | 7 Resumen y cortes | ✅ Verificada | + corte de turno ajeno, total con todo y fondo, Gastos e ingresos; decisiones 41–51 |
-| 8 Configuración y respaldos | ⏳ Siguiente | |
-| 9 Pulido | Pendiente | Incluye devolución parcial (24-cancelaciones) |
+| 8 Configuración y respaldos | ✅ Verificada | Un solo Guardar, categorías se quitan si están vacías; decisiones 52–58 |
+| 9 Pulido | ⏳ Siguiente (última) | Incluye devolución parcial (24-cancelaciones) |
 
 Las decisiones tomadas en el camino están en `docs/05-decisiones.md`.
 

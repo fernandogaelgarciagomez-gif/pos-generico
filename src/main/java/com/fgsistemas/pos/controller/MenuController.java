@@ -52,7 +52,7 @@ public class MenuController {
             new Opcion(6, "Cortes pasados", "mdi2h-history", Permiso.VER_CORTES_PASADOS, "cortes", 0),
             new Opcion(7, "Fiados / Clientes", "mdi2a-account-cash", Permiso.FIADOS_VENDER, "fiados", 0),
             new Opcion(8, "Usuarios", "mdi2a-account-multiple", Permiso.USUARIOS, "usuarios", 0),
-            new Opcion(9, "Configuración", "mdi2c-cog", Permiso.CONFIGURACION, null, 8),
+            new Opcion(9, "Configuración", "mdi2c-cog", Permiso.CONFIGURACION, "configuracion", 0),
             // Pedido del cliente tras la Fase 7: F10 o 0.
             new Opcion(10, "Gastos e ingresos", "mdi2c-cash-multiple", Permiso.VENDER, "gastos", 0));
 

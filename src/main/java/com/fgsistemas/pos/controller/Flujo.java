@@ -4,6 +4,7 @@ import com.fgsistemas.pos.model.Turno;
 import com.fgsistemas.pos.service.AuthService;
 import com.fgsistemas.pos.service.ConfiguracionInicialService;
 import com.fgsistemas.pos.service.InventarioService;
+import com.fgsistemas.pos.service.RespaldoService;
 import com.fgsistemas.pos.service.TurnoService;
 import com.fgsistemas.pos.util.Alertas;
 import com.fgsistemas.pos.util.Fechas;
@@ -84,6 +85,10 @@ public final class Flujo {
             Alertas.advertencia("Este turno lleva abierto " + desde + ". Se recomienda hacer corte.");
         }
         if (Sesion.esAdmin()) {
+            String avisoRespaldo = RespaldoService.tomarAviso();
+            if (avisoRespaldo != null) {
+                Alertas.advertencia(avisoRespaldo);
+            }
             try {
                 int bajos = new InventarioService().contarStockBajo();
                 if (bajos > 0) {

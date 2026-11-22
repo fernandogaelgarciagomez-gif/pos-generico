@@ -3,6 +3,7 @@ package com.fgsistemas.pos;
 import com.fgsistemas.pos.config.AppConfig;
 import com.fgsistemas.pos.config.Database;
 import com.fgsistemas.pos.controller.Flujo;
+import com.fgsistemas.pos.service.RespaldoService;
 import com.fgsistemas.pos.util.Alertas;
 import com.fgsistemas.pos.util.Navegador;
 import javafx.application.Application;
@@ -50,7 +51,8 @@ public class App extends Application {
             return;
         }
 
-        // TODO Fase 8: respaldo automático diario (docs/modulos/23-respaldos.md).
+        // Respaldo automático diario (23-respaldos.md). Si falla, se avisa al admin al entrar; no bloquea.
+        new RespaldoService().automaticoAlAbrir();
 
         stage.setMinWidth(1024);
         stage.setMinHeight(700);

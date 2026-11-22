@@ -159,7 +159,15 @@ public class LoginController {
         if (!Files.isRegularFile(ruta)) {
             return;
         }
-        imgLogo.setImage(new Image(ruta.toUri().toString(), true));
+        try (java.io.InputStream in = Files.newInputStream(ruta)) {
+            Image imagen = new Image(in); // por stream: si cambian el logo se ve el nuevo, sin caché
+            if (imagen.isError()) {
+                return;
+            }
+            imgLogo.setImage(imagen);
+        } catch (java.io.IOException e) {
+            return;
+        }
         imgLogo.setVisible(true);
         imgLogo.setManaged(true);
         logoGenerico.setVisible(false);

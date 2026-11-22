@@ -138,6 +138,7 @@ public class CorteService {
         if (esTurnoDeLaSesion(turnoId)) {
             Sesion.setTurno(null);
         }
+        new RespaldoService().automaticoDespuesDeCorte(); // nunca falla el corte (23-respaldos.md)
         return guardado;
     }
 
