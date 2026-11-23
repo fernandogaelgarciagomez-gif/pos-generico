@@ -34,6 +34,19 @@ public final class Navegador {
         scene = new Scene(vacio, 1280, 800);
         scene.getStylesheets().add(hojaEstilos());
         stage.setScene(scene);
+        stage.getIcons().addAll(iconos());
+    }
+
+    /** Ícono del programa (ventana y barra de tareas) en varios tamaños; Windows elige el que mejor se ve. */
+    public static java.util.List<javafx.scene.image.Image> iconos() {
+        java.util.List<javafx.scene.image.Image> lista = new java.util.ArrayList<>();
+        for (int tam : new int[]{16, 32, 48, 64, 256}) {
+            java.io.InputStream in = Navegador.class.getResourceAsStream("/img/icono-" + tam + ".png");
+            if (in != null) {
+                lista.add(new javafx.scene.image.Image(in));
+            }
+        }
+        return lista;
     }
 
     /** Carga {@code /fxml/<vista>.fxml}, la pone como raíz y regresa su controlador. */

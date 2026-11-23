@@ -23,9 +23,11 @@ mvn test
 ```
 powershell -ExecutionPolicy Bypass -File .\empaquetar.ps1
 ```
-Corre las pruebas y deja en `target\instalador\` la carpeta **Punto de Venta** (con `Punto de Venta.exe`
-y su propio Java, no hay que instalar nada más) y un `.zip` para copiarla. Si está instalado
-[WiX Toolset 3](https://wixtoolset.org/), también genera un instalador `.exe` con acceso directo.
+Corre las pruebas y deja en `target\instalador\` el archivo **Punto de Venta <versión> - instalador.zip**
+(versiones de 64 y 32 bits, cada una con su propio Java, + `Instalar.bat`, que elige la correcta). La de 32 bits
+necesita el JDK 17 x86 en `C:\dev\tools\jdk17-x86` (sin él, se omite). En la computadora de la tienda: descomprimir y doble clic en
+`Instalar.bat` (ver `instalador/LEEME.txt`). Si está instalado [WiX Toolset 3](https://wixtoolset.org/), también
+genera un instalador `.exe`.
 
 ## Datos
 La base de datos, respaldos, logs e imágenes viven en `%LOCALAPPDATA%\FGSistemas\POS\`

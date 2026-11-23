@@ -19,6 +19,9 @@ import java.util.logging.Logger;
 /** Arranque: BD + migraciones, y decide primera vez (bienvenida) vs login. */
 public class App extends Application {
 
+    /** Antes que nada (antes de leer cualquier fecha): la zona horaria igual a la de Windows. */
+    private static final String CORRECCION_ZONA = com.fgsistemas.pos.util.ZonaHoraria.corregir();
+
     private static final Logger LOG = Logger.getLogger(App.class.getName());
 
     static {
@@ -44,6 +47,9 @@ public class App extends Application {
 
         // Fase 9: registro de errores en %LOCALAPPDATA%\FGSistemas\POS\logs y errores inesperados sin stack trace.
         Registro.configurar(AppConfig.carpetaLogs());
+        if (CORRECCION_ZONA != null) {
+            LOG.info(CORRECCION_ZONA);
+        }
         Thread.setDefaultUncaughtExceptionHandler(App::errorInesperado);
 
         if (!Registro.tomarCandado(AppConfig.carpetaDatos())) {

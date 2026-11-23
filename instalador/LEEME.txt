@@ -1,0 +1,32 @@
+﻿PUNTO DE VENTA - FG Sistemas
+============================
+
+INSTALAR (Windows 10 u 11, de 64 o de 32 bits: el instalador elige solo)
+1. Descomprime TODO este .zip (clic derecho > Extraer todo...).
+2. Abre la carpeta que se creó y da doble clic en  Instalar.bat
+   - Si Windows dice "Windows protegió su PC": Más información > Ejecutar de todas formas.
+3. Al terminar aparece el icono "Punto de Venta" en el Escritorio y en el menú Inicio,
+   y el programa se abre solo. No hay que instalar Java ni base de datos: ya vienen incluidos.
+
+SI ALGO SALE MAL
+- "No se encontró la carpeta": no se descomprimió todo el .zip. Usa "Extraer todo".
+- El antivirus lo bloquea: agrega como excepción la carpeta %LOCALAPPDATA%\Programs\Punto de Venta
+- Registro de la instalación: %LOCALAPPDATA%\FGSistemas\POS\logs\instalacion.log
+
+La primera vez pide crear el usuario administrador y los datos del negocio.
+
+ACTUALIZAR A UNA VERSIÓN NUEVA
+Cierra el Punto de Venta y ejecuta Instalar.bat de la versión nueva.
+Las ventas, el inventario y los respaldos se conservan.
+
+DÓNDE ESTÁ CADA COSA
+- Programa:  %LOCALAPPDATA%\Programs\Punto de Venta
+- Datos y respaldos:  %LOCALAPPDATA%\FGSistemas\POS   (no se borran nunca al instalar o desinstalar)
+- Exportaciones (Excel/PDF):  Documentos\Punto de Venta\Exportaciones
+
+DESINSTALAR
+Configuración de Windows > Aplicaciones > "Punto de Venta" > Desinstalar.
+Los datos se quedan en la computadora.
+
+IMPORTANTE: una vez por semana haz un respaldo en una USB
+(Configuración > Respaldos > F6).

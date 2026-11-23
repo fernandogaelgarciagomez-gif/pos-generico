@@ -170,3 +170,24 @@ Este archivo **manda** sobre el resto de los docs si hay contradicción.
     busca por nombre (para no duplicar al importar dos veces) y si no existe se genera `NV001`, `NV002`…
 72. Todo o nada: las filas válidas se guardan en una sola transacción; el stock entra al kardex como AJUSTE
     "Inventario inicial (Excel)" y queda en bitácora `IMPORTAR_PRODUCTOS`.
+
+## Después de la Fase 9
+73. **Ícono del programa** (carrito blanco con moneda verde sobre azul marino, paleta de 03-diseno-ui) en la ventana,
+    los diálogos, el `.exe` y los accesos directos (`src/main/resources/img/icono*.png|.ico`).
+74. **Instalador para Windows 10/11** (`instalador/`): `Instalar.bat` → `instalar.ps1`, sin permisos de administrador.
+    Instala en `%LOCALAPPDATA%\Programs\Punto de Venta`, crea accesos en Escritorio y menú Inicio y lo registra en
+    "Agregar o quitar programas" (HKCU). Revisa 64 bits y espacio, pide cerrar el programa si está abierto, guarda la
+    versión anterior hasta terminar de copiar y desbloquea los archivos bajados de internet. Nunca toca los datos.
+    `empaquetar.ps1` genera `Punto de Venta <versión> - instalador.zip` con todo eso.
+75. **Zona horaria**: Java 17 asocia "(UTC-07:00) La Paz, Mazatlán" con `America/Chihuahua` (UTC-6 desde 2022) y las
+    fechas salían una hora adelantadas. Al arrancar, `ZonaHoraria.corregir()` lee la hora real de Windows
+    (`ActiveTimeBias`) y, si no coincide, usa `America/Mazatlan` (o la hora fija de Windows); queda en el log.
+76. **Sin extraer librerías al arrancar**: las DLL de JavaFX se sacan del `.jar` y, junto con la de SQLite, van en
+    `app\native`; el programa las carga con `java.library.path` y `org.sqlite.lib.path`. Nada se escribe en Temp ni en
+    `%USERPROFILE%\.openjfx` (antivirus, usuarios con acentos, Temp lleno o sin permisos).
+77. **Versión de 32 bits** en el mismo paquete: Java 17 x86 (Temurin, recortado con jlink con los mismos módulos que la
+    de 64) + JavaFX 17.0.8 win-x86 (la última de 17 publicada para 32 bits). Arranca con `runtime\bin\javaw.exe` y los
+    argumentos de `lanzador.txt` (también `Punto de Venta.cmd`). `instalar.ps1` elige la versión según el Windows.
+78. **Instalador más seguro**: revisa Windows 10/11, espacio (600 MB), memoria y pantalla (avisos), guarda un registro en
+    `logs\instalacion.log`, y al final abre el programa y comprueba que siga vivo; si se cierra, explica qué hacer.
+    Memoria máxima de Java fija en 768 MB (`-Xmx768m`) para que funcione igual en 32 bits.

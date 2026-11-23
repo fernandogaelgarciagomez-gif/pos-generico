@@ -100,6 +100,10 @@ public final class Alertas {
             dialogo.initOwner(dueno);
         }
         DialogPane panel = dialogo.getDialogPane();
+        if (panel.getScene() != null && panel.getScene().getWindow() instanceof Stage ventana
+                && ventana.getIcons().isEmpty()) {
+            ventana.getIcons().addAll(Navegador.iconos());
+        }
         try {
             panel.getStylesheets().add(Navegador.hojaEstilos());
         } catch (IllegalStateException sinCss) {
