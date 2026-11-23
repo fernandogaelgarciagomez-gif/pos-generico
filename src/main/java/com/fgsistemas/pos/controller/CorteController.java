@@ -2,6 +2,7 @@ package com.fgsistemas.pos.controller;
 
 import com.fgsistemas.pos.model.Corte;
 import com.fgsistemas.pos.model.Turno;
+import com.fgsistemas.pos.service.Avisos;
 import com.fgsistemas.pos.service.Autorizacion;
 import com.fgsistemas.pos.service.CorteService;
 import com.fgsistemas.pos.service.PermisoDenegadoException;
@@ -248,8 +249,21 @@ public class CorteController {
             Flujo.errorDatos(e);
             return;
         }
+        // Errores humanos: billetes pegados, un billete contado dos veces, un cero de más. Se sugiere recontar
+        // (una vez por conteo distinto) sin revelar cuánto debería haber.
+        String aviso = Avisos.diferenciaCorte(previa.diferencia(), previa.efectivoEsperado());
+        if (aviso != null && contado != ultimoContadoAvisado) {
+            ultimoContadoAvisado = contado;
+            if (Alertas.confirmar(aviso)) {
+                (porDenominacion && !cantidades.isEmpty() ? cantidades.get(0) : txtTotal).requestFocus();
+                return;
+            }
+        }
         mostrarPaso2();
     }
+
+    /** Último conteo por el que ya se sugirió recontar (si se repite igual, se sigue sin preguntar). */
+    private long ultimoContadoAvisado = -1;
 
     private void salirSinCorte() {
         if (ajeno) {

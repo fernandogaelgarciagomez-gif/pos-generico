@@ -2,6 +2,7 @@ package com.fgsistemas.pos.controller;
 
 import com.fgsistemas.pos.model.Permiso;
 import com.fgsistemas.pos.model.Turno;
+import com.fgsistemas.pos.service.Avisos;
 import com.fgsistemas.pos.service.Autorizacion;
 import com.fgsistemas.pos.util.Navegador;
 import com.fgsistemas.pos.service.TurnoService;
@@ -89,6 +90,18 @@ public class TurnoController {
         } catch (IllegalArgumentException e) {
             lblErrorFondo.setText(e.getMessage());
             txtFondo.requestFocus();
+            return;
+        }
+        // Errores humanos: un cero de más en el fondo descuadra el corte de todo el turno.
+        try {
+            String aviso = Avisos.fondo(fondo, turnos.ultimoFondo().orElse(null));
+            if (aviso != null && !Alertas.confirmarPeligro(aviso)) {
+                txtFondo.requestFocus();
+                txtFondo.selectAll();
+                return;
+            }
+        } catch (SQLException e) {
+            Flujo.errorDatos(e);
             return;
         }
         try {

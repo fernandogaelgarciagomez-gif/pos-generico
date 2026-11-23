@@ -66,4 +66,22 @@ public class TurnoDao {
         t.setId(id);
         return id;
     }
+
+    /** Fondo inicial del último turno abierto (para avisar si el fondo nuevo es muy distinto). */
+    public Optional<Long> ultimoFondo(Connection c) throws SQLException {
+        try (PreparedStatement ps = c.prepareStatement("SELECT fondo_inicial FROM turnos ORDER BY id DESC LIMIT 1");
+             ResultSet rs = ps.executeQuery()) {
+            return rs.next() ? Optional.of(rs.getLong(1)) : Optional.empty();
+        }
+    }
+
+    /** Fecha más reciente registrada en ventas o turnos (para detectar el reloj de la PC atrasado). */
+    public Optional<java.time.LocalDateTime> ultimaFechaRegistrada(Connection c) throws SQLException {
+        try (PreparedStatement ps = c.prepareStatement("SELECT MAX(f) FROM (SELECT MAX(fecha) AS f FROM ventas "
+                + "UNION ALL SELECT MAX(abierto_en) FROM turnos UNION ALL SELECT MAX(cerrado_en) FROM turnos)");
+             ResultSet rs = ps.executeQuery()) {
+            String f = rs.next() ? rs.getString(1) : null;
+            return f == null ? Optional.empty() : Optional.of(com.fgsistemas.pos.util.Fechas.deTexto(f));
+        }
+    }
 }

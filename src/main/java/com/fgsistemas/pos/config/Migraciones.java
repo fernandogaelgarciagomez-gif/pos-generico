@@ -19,6 +19,7 @@ public final class Migraciones {
 
     static final String[] SCRIPTS = {
             "/db/V1__esquema_inicial.sql",
+            "/db/V2__devoluciones.sql",
     };
 
     private Migraciones() {
@@ -54,6 +55,18 @@ public final class Migraciones {
                 c.setAutoCommit(true);
             }
         }
+    }
+
+    /** Versión de la BD, o 0 si es nueva (aún no tiene la tabla schema_version). */
+    static int versionActualSiExiste(Connection c) throws SQLException {
+        try (PreparedStatement ps = c.prepareStatement(
+                "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'schema_version'");
+             ResultSet rs = ps.executeQuery()) {
+            if (!rs.next()) {
+                return 0;
+            }
+        }
+        return versionActual(c);
     }
 
     public static int versionActual(Connection c) throws SQLException {

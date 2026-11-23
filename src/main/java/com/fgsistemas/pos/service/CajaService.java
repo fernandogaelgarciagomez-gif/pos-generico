@@ -15,6 +15,17 @@ public class CajaService {
     private final MovimientoCajaDao cajaDao = new MovimientoCajaDao();
     private final BitacoraDao bitacoraDao = new BitacoraDao();
 
+    /** Efectivo que debe haber ahora en la caja del turno actual (para mostrarlo al registrar un retiro). */
+    public long efectivoDisponible() throws SQLException {
+        Sesion.requiere(Permiso.VENDER);
+        if (Sesion.turno() == null) {
+            return 0;
+        }
+        try (java.sql.Connection c = Database.conectar()) {
+            return EfectivoEnCaja.disponible(c, Sesion.turno().getId());
+        }
+    }
+
     /** Gastos (retiros) e ingresos (entradas) del turno actual, del más antiguo al más reciente. */
     public java.util.List<MovimientoCajaDao.Movimiento> movimientosTurno() throws SQLException {
         Sesion.requiere(Permiso.VENDER);
@@ -47,6 +58,9 @@ public class CajaService {
         Database.enTransaccion(c -> {
             Long autorizo = tipo == MovimientoCajaDao.Tipo.RETIRO
                     ? Autorizaciones.verificar(c, Permiso.RETIROS_CAJA, autorizacion) : null;
+            if (tipo == MovimientoCajaDao.Tipo.RETIRO) {
+                EfectivoEnCaja.exigir(c, turnoId, monto, "este retiro");
+            }
             cajaDao.registrar(c, turnoId, usuarioId, tipo, monto, concepto.trim());
             bitacoraDao.registrar(c, usuarioId, tipo == MovimientoCajaDao.Tipo.RETIRO ? "RETIRO_CAJA" : "ENTRADA_CAJA",
                     Dinero.formatear(monto) + " · " + concepto.trim()

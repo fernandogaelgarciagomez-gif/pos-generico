@@ -383,6 +383,18 @@ final class VentaDialogos {
             if (error != null) {
                 lblError.setText(error);
                 e.consume();
+                return;
+            }
+            // Errores humanos: un cero de más en "Recibido" haría dar un cambio enorme.
+            for (Pago p : resultado) {
+                String aviso = p.metodo() == MetodoPago.EFECTIVO && p.recibido() != null
+                        ? com.fgsistemas.pos.service.Avisos.cambio(p.monto(), p.recibido()) : null;
+                if (aviso != null && !Alertas.confirmarPeligro(aviso)) {
+                    e.consume();
+                    txtRecibido.requestFocus();
+                    txtRecibido.selectAll();
+                    return;
+                }
             }
         });
 
@@ -673,6 +685,16 @@ final class VentaDialogos {
 
     // ================================================================== caja
 
+    /** " En la caja debe haber $X." para la nota de retiros y gastos (vacío si no se puede calcular). */
+    static String textoEfectivoEnCaja(CajaService caja) {
+        try {
+            return " En la caja debe haber " + Dinero.formatear(caja.efectivoDisponible())
+                    + " (no se puede retirar más).";
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
     /** F8: entrada o retiro de efectivo con concepto. El cajero necesita autorización para retirar. */
     static void movimientoCaja() {
         ComboBox<MovimientoCajaDao.Tipo> cmbTipo = new ComboBox<>(FXCollections.observableArrayList(
@@ -693,7 +715,8 @@ final class VentaDialogos {
                 .campo("Monto", txtMonto)
                 .campo("Concepto", txtConcepto)
                 .nota("Tipo: ↑ ↓ para cambiar. Se refleja en el corte de caja."
-                        + (Sesion.tiene(Permiso.RETIROS_CAJA) ? "" : " Los retiros piden autorización de un administrador."))
+                        + (Sesion.tiene(Permiso.RETIROS_CAJA) ? "" : " Los retiros piden autorización de un administrador.")
+                        + textoEfectivoEnCaja(caja))
                 .mostrar(() -> {
                     try {
                         long monto = txtMonto.getText().isBlank() ? 0 : Dinero.parsear(txtMonto.getText());
@@ -814,6 +837,21 @@ final class VentaDialogos {
             }
             tabla.requestFocus();
         };
+        Runnable devolver = () -> {
+            Venta.Resumen sel = tabla.getSelectionModel().getSelectedItem();
+            if (sel != null && DevolucionDialogos.devolver(sel.id(), "#" + sel.folio())) {
+                huboCancelacion[0] = true; // el stock cambió
+                cargar.run();
+            }
+            tabla.requestFocus();
+        };
+        Runnable devolverPorFolio = () -> {
+            if (DevolucionDialogos.porFolio()) {
+                huboCancelacion[0] = true;
+                cargar.run();
+            }
+            tabla.requestFocus();
+        };
         tabla.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
             if (e.getCode() == KeyCode.ENTER) {
                 e.consume();
@@ -821,6 +859,13 @@ final class VentaDialogos {
             } else if (e.getCode() == KeyCode.C && !e.isControlDown()) {
                 e.consume();
                 cancelarDirecto.run();
+            } else if (e.getCode() == KeyCode.D && !e.isControlDown()) {
+                e.consume();
+                if (e.isShiftDown()) {
+                    devolverPorFolio.run();
+                } else {
+                    devolver.run();
+                }
             }
         });
         tabla.setOnMouseClicked(e -> {
@@ -830,7 +875,9 @@ final class VentaDialogos {
         });
         Tablas.dialogo("Ventas del turno", null, tabla, pie, 1000, 560, List.of(
                 Acciones.boton("Ver detalle", "Enter", verDetalle),
-                Acciones.boton("Cancelar venta", "C", cancelarDirecto)));
+                Acciones.boton("Cancelar venta", "C", cancelarDirecto),
+                Acciones.boton("Devolver productos", "D", devolver),
+                Acciones.boton("Devolución por folio", "Shift+D", devolverPorFolio)));
         return huboCancelacion[0];
     }
 

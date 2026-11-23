@@ -21,6 +21,8 @@ public final class Navegador {
 
     private static Stage stage;
     private static Scene scene;
+    /** Lo que la pantalla actual perdería si se cierra la ventana (null = nada). Se borra al navegar. */
+    private static java.util.function.Supplier<String> cambiosPendientes;
 
     private Navegador() {
     }
@@ -42,11 +44,29 @@ public final class Navegador {
         }
         FXMLLoader loader = new FXMLLoader(recurso);
         try {
+            cambiosPendientes = null;
             Parent raiz = loader.load();
             scene.setRoot(raiz);
             return loader.getController();
         } catch (IOException e) {
             throw new UncheckedIOException("No se pudo cargar la vista " + vista, e);
+        }
+    }
+
+    /**
+     * La pantalla actual avisa qué se perdería al cerrar la ventana (ej. "Hay una venta con 3 productos").
+     * El proveedor regresa null cuando no hay nada pendiente.
+     */
+    public static void alCerrarAvisar(java.util.function.Supplier<String> pendiente) {
+        cambiosPendientes = pendiente;
+    }
+
+    /** Texto de lo que se perdería al cerrar, o null. */
+    public static String cambiosPendientes() {
+        try {
+            return cambiosPendientes == null ? null : cambiosPendientes.get();
+        } catch (RuntimeException e) {
+            return null;
         }
     }
 

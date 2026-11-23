@@ -101,4 +101,26 @@ public class EntradaDao {
         }
         return lista;
     }
+
+    /** Entrada anterior con la misma factura (y el mismo proveedor, si se dio), sin distinguir mayúsculas. */
+    public java.util.Optional<String> buscarFactura(Connection c, String proveedor, String factura) throws SQLException {
+        boolean conProveedor = proveedor != null && !proveedor.isBlank();
+        try (PreparedStatement ps = c.prepareStatement("SELECT id, fecha, proveedor, total_costo FROM entradas_mercancia "
+                + "WHERE TRIM(factura) = ? COLLATE NOCASE"
+                + (conProveedor ? " AND TRIM(proveedor) = ? COLLATE NOCASE" : "") + " ORDER BY id DESC LIMIT 1")) {
+            ps.setString(1, factura.trim());
+            if (conProveedor) {
+                ps.setString(2, proveedor.trim());
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    return java.util.Optional.empty();
+                }
+                return java.util.Optional.of("Entrada #" + rs.getLong(1) + " del "
+                        + com.fgsistemas.pos.util.Fechas.FECHA_HORA.format(com.fgsistemas.pos.util.Fechas.deTexto(rs.getString(2)))
+                        + (rs.getString(3) == null ? "" : " · " + rs.getString(3))
+                        + " · " + com.fgsistemas.pos.util.Dinero.formatear(rs.getLong(4)));
+            }
+        }
+    }
 }

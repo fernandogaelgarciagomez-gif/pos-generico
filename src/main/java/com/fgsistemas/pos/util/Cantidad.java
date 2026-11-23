@@ -17,12 +17,35 @@ public final class Cantidad {
 
     /** Una unidad completa (1 pza, 1 kg, 1 m) en milésimas. */
     public static final long UNO = 1000;
+    /**
+     * Máximo que se puede capturar de una vez: 999,999 unidades.
+     * DECISION (Fase 9, errores humanos): un código de barras (8–13 dígitos) escaneado por error en un campo
+     * de cantidad queda fuera de rango y se rechaza en vez de meter millones de piezas.
+     */
+    public static final long MAXIMO = 999_999L * UNO;
 
     private static final Locale MX = Locale.forLanguageTag("es-MX");
     private static final BigDecimal MIL = BigDecimal.valueOf(UNO);
+    public static final String MENSAJE_MAXIMO =
+            "La cantidad es demasiado grande. ¿Se escaneó un código en el campo de cantidad?";
     private static final Pattern CANTIDAD = Pattern.compile("\\d+(\\.\\d{0,3})?|\\.\\d{1,3}");
 
     private Cantidad() {
+    }
+
+    /**
+     * Aviso (no error) cuando una cantidad es rara para una sola captura: más de 500 piezas o más de
+     * 100 kg / m / l. El que captura confirma; así se atrapa "50" en vez de "5" o "1000" en vez de "1.000".
+     *
+     * @return el texto del aviso, o null si la cantidad es normal
+     */
+    public static String avisoCantidadInusual(long milesimas, TipoVenta tipo, String unidad) {
+        long limite = (tipo == null || tipo == TipoVenta.PIEZA ? 500 : 100) * UNO;
+        if (milesimas <= limite) {
+            return null;
+        }
+        return "Vas a capturar " + formatear(milesimas, tipo == null ? TipoVenta.PIEZA : tipo, unidad)
+                + ". Es una cantidad poco común.\n\n¿Es correcta?";
     }
 
     public static long dePiezas(long piezas) {
@@ -48,6 +71,9 @@ public final class Cantidad {
             milesimas = new BigDecimal(limpio).movePointRight(3).longValueExact();
         } catch (ArithmeticException | NumberFormatException e) {
             throw new IllegalArgumentException("Cantidad inválida: " + texto.trim());
+        }
+        if (milesimas > MAXIMO) {
+            throw new IllegalArgumentException(MENSAJE_MAXIMO);
         }
         if (!tipo.aceptaDecimales() && milesimas % UNO != 0) {
             throw new IllegalArgumentException("Este producto se vende por pieza.");
@@ -96,10 +122,14 @@ public final class Cantidad {
         if (precioCentavos <= 0) {
             throw new IllegalArgumentException("El producto no tiene precio.");
         }
-        return BigDecimal.valueOf(importeCentavos)
+        long q = BigDecimal.valueOf(importeCentavos)
                 .multiply(MIL)
                 .divide(BigDecimal.valueOf(precioCentavos), 0, RoundingMode.HALF_UP)
                 .longValueExact();
+        if (q > MAXIMO) {
+            throw new IllegalArgumentException(MENSAJE_MAXIMO);
+        }
+        return q;
     }
 
     private static DecimalFormat formato(String patron) {

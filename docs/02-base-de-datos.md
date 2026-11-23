@@ -197,6 +197,30 @@ CREATE TABLE bitacora (
 );
 ```
 
+## V2 — Devoluciones (Fase 9)
+```sql
+CREATE TABLE devoluciones (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  venta_id INTEGER NOT NULL REFERENCES ventas(id),
+  turno_id INTEGER NOT NULL REFERENCES turnos(id),   -- turno en que se devolvió (de ahí sale el efectivo)
+  usuario_id INTEGER NOT NULL REFERENCES usuarios(id),
+  autorizada_por INTEGER REFERENCES usuarios(id),
+  motivo TEXT NOT NULL,
+  total INTEGER NOT NULL,                             -- centavos reembolsados
+  fecha TEXT NOT NULL
+);
+CREATE TABLE devolucion_detalle (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  devolucion_id INTEGER NOT NULL REFERENCES devoluciones(id),
+  producto_id INTEGER NOT NULL REFERENCES productos(id),
+  cantidad INTEGER NOT NULL,                          -- milésimas
+  importe INTEGER NOT NULL,                           -- centavos
+  costo_unitario INTEGER NOT NULL
+);
+```
+`movimientos_inventario.tipo` admite además `'DEVOLUCION'` (la migración reconstruye la tabla).
+El reembolso se registra también como `movimientos_caja` tipo RETIRO.
+
 ## Reglas
 - `folio` de venta consecutivo: `SELECT COALESCE(MAX(folio),0)+1` dentro de la transacción.
 - `clientes.saldo` se actualiza en la misma transacción que la venta a fiado o el abono.

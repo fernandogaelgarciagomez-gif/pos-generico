@@ -65,7 +65,26 @@ public class LoginController {
         });
         tic();
 
+        // Errores humanos: contraseña "incorrecta" por tener Bloq Mayús activado.
+        lblBloqMayus.getStyleClass().add("texto-advertencia");
+        lblBloqMayus.setManaged(false);
+        lblBloqMayus.setVisible(false);
+        if (txtPassword.getParent() instanceof javafx.scene.layout.Pane padre) {
+            padre.getChildren().add(padre.getChildren().indexOf(txtPassword) + 1, lblBloqMayus);
+        }
+        txtPassword.addEventHandler(javafx.scene.input.KeyEvent.KEY_RELEASED, e -> revisarBloqMayus());
+        txtPassword.focusedProperty().addListener((o, a, b) -> revisarBloqMayus());
+
         Teclado.enfocar(txtUsuario);
+    }
+
+    private final Label lblBloqMayus = new Label("⚠ Bloq Mayús está activado");
+
+    private void revisarBloqMayus() {
+        boolean activo = txtPassword.isFocused()
+                && javafx.application.Platform.isKeyLocked(javafx.scene.input.KeyCode.CAPS).orElse(false);
+        lblBloqMayus.setVisible(activo);
+        lblBloqMayus.setManaged(activo);
     }
 
     /** Viene de la bienvenida: usuario ya escrito y foco en la contraseña. */

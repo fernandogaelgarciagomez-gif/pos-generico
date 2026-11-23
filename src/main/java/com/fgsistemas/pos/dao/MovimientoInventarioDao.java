@@ -12,7 +12,7 @@ import java.util.List;
 
 public class MovimientoInventarioDao {
 
-    public enum Tipo { VENTA, CANCELACION, ENTRADA, AJUSTE }
+    public enum Tipo { VENTA, CANCELACION, ENTRADA, AJUSTE, DEVOLUCION }
 
     public void registrar(Connection c, long productoId, Tipo tipo, long cantidad, long stockResultante,
                           Long referenciaId, long usuarioId, String motivo) throws SQLException {

@@ -27,8 +27,26 @@ public final class Database {
         archivo = absoluto;
         url = "jdbc:sqlite:" + absoluto;
         try (Connection c = conectar()) {
+            int actual = Migraciones.versionActualSiExiste(c);
+            if (actual > 0 && actual < Migraciones.versionMasReciente()) {
+                respaldarAntesDeActualizar(absoluto, actual);
+            }
             Migraciones.ejecutar(c);
         }
+    }
+
+    /**
+     * Antes de cambiar el esquema de una BD con datos (versión nueva del sistema), se copia el archivo tal cual
+     * a {@code respaldos/pos_AAAA-MM-DD_HHmm_antes-de-actualizar-vN.db}. Si la actualización falla, ahí están los
+     * datos intactos (se restauran desde Configuración → Respaldos).
+     */
+    private static void respaldarAntesDeActualizar(Path bd, int versionActual) throws IOException {
+        Path carpeta = bd.resolveSibling("respaldos");
+        Files.createDirectories(carpeta);
+        String sello = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmm")
+                .format(com.fgsistemas.pos.util.Fechas.ahora());
+        Path destino = carpeta.resolve("pos_" + sello + "_antes-de-actualizar-v" + versionActual + ".db");
+        Files.copy(bd, destino, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
     }
 
     public static Path archivo() {

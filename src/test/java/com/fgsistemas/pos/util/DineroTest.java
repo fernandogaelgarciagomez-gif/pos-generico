@@ -36,11 +36,14 @@ class DineroTest {
         assertThrows(IllegalArgumentException.class, () -> Dinero.parsear("abc"));
         assertThrows(IllegalArgumentException.class, () -> Dinero.parsear("1.234"));
         assertThrows(IllegalArgumentException.class, () -> Dinero.parsear("1.2.3"));
+        // Un código de barras escaneado en un campo de dinero se rechaza (Fase 9).
+        assertThrows(IllegalArgumentException.class, () -> Dinero.parsear("7501055300846"));
+        assertThrows(IllegalArgumentException.class, () -> Dinero.parsear("1000000"));
     }
 
     @Test
     void idaYVuelta() {
-        for (long c : new long[]{0, 1, 99, 100, 123456789}) {
+        for (long c : new long[]{0, 1, 99, 100, 12345678, Dinero.MAXIMO}) {
             assertEquals(c, Dinero.parsear(Dinero.formatear(c)));
             assertEquals(c, Dinero.parsear(Dinero.paraCampo(c)));
         }

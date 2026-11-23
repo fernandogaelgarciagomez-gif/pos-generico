@@ -1,12 +1,14 @@
 package com.fgsistemas.pos.controller;
 
 import com.fgsistemas.pos.model.Producto;
+import com.fgsistemas.pos.service.Avisos;
 import com.fgsistemas.pos.service.EntradaService;
 import com.fgsistemas.pos.service.EntradaService.CambioCosto;
 import com.fgsistemas.pos.service.EntradaService.Linea;
 import com.fgsistemas.pos.service.EntradaService.Resultado;
 import com.fgsistemas.pos.service.InventarioService;
 import com.fgsistemas.pos.service.PermisoDenegadoException;
+import com.fgsistemas.pos.util.Navegador;
 import com.fgsistemas.pos.util.Acciones;
 import com.fgsistemas.pos.util.Alertas;
 import com.fgsistemas.pos.util.Cantidad;
@@ -94,6 +96,8 @@ public class EntradaController {
         cargarProveedores();
         limpiarCaptura();
         actualizarTotales();
+        Navegador.alCerrarAvisar(() -> renglones.isEmpty() && enCaptura == null ? null
+                : "Hay una entrada de mercancía sin guardar con " + renglones.size() + " productos.");
         Teclado.enfocar(cmbProveedor);
     }
 
@@ -303,6 +307,21 @@ public class EntradaController {
             txtCosto.requestFocus();
             return;
         }
+        // Errores humanos: un código escaneado en la cantidad, "100" en vez de "10", o el costo de la caja
+        // completa en vez del de una unidad. Se pide confirmar; el foco regresa al campo sospechoso.
+        Renglon existente = editando != null ? null : buscarRenglon(enCaptura.getId());
+        long cantidadFinal = q.get() + (existente == null ? 0 : existente.cantidad);
+        String avisoCantidad = Cantidad.avisoCantidadInusual(cantidadFinal, enCaptura.getTipoVenta(),
+                enCaptura.getUnidad());
+        if (avisoCantidad != null && !Alertas.confirmarPeligro(enCaptura.getNombre() + "\n\n" + avisoCantidad)) {
+            txtCantidad.requestFocus();
+            return;
+        }
+        String avisoCosto = Avisos.costo(costo, enCaptura.getCosto(), enCaptura.getPrecioVenta());
+        if (avisoCosto != null && !Alertas.confirmarPeligro(enCaptura.getNombre() + "\n\n" + avisoCosto)) {
+            txtCosto.requestFocus();
+            return;
+        }
         Renglon r;
         if (editando != null) {
             r = editando;
@@ -436,6 +455,19 @@ public class EntradaController {
             return;
         }
         String proveedor = cmbProveedor.getEditor().getText();
+        // Errores humanos: capturar dos veces la misma factura.
+        try {
+            Optional<String> anterior = entradas.facturaYaRegistrada(proveedor, txtFactura.getText());
+            if (anterior.isPresent() && !Alertas.confirmarPeligro("La factura \"" + txtFactura.getText().trim()
+                    + "\" ya se registró:\n" + anterior.get()
+                    + "\n\nSi la guardas otra vez, el stock se sumará dos veces.\n\n¿Guardarla de todos modos?")) {
+                txtFactura.requestFocus();
+                return;
+            }
+        } catch (SQLException e) {
+            Flujo.errorDatos(e);
+            return;
+        }
         long total = renglones.stream().mapToLong(Renglon::subtotal).sum();
         String resumen = "Guardar entrada de mercancía:\n\n"
                 + "  Proveedor: " + (proveedor.isBlank() ? "(sin proveedor)" : proveedor.trim()) + "\n"
@@ -501,7 +533,12 @@ public class EntradaController {
                 .nota("Sugerido: el precio que mantiene el mismo margen. Esc deja el precio como está.")
                 .mostrar(() -> {
                     try {
-                        inventario.cambiarPrecio(p.getId(), Dinero.parsear(txtPrecio.getText()));
+                        long nuevoPrecio = Dinero.parsear(txtPrecio.getText());
+                        String aviso = Avisos.precio(nuevoPrecio, precio, c.costoNuevo());
+                        if (aviso != null && !Alertas.confirmarPeligro(p.getNombre() + "\n\n" + aviso)) {
+                            return "Revisa el precio.";
+                        }
+                        inventario.cambiarPrecio(p.getId(), nuevoPrecio);
                         return null;
                     } catch (IllegalArgumentException | PermisoDenegadoException e) {
                         return e.getMessage();

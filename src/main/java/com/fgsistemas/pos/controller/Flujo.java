@@ -48,6 +48,11 @@ public final class Flujo {
     public static void despuesDeLogin() {
         try {
             TurnoService turnos = new TurnoService();
+            // Errores humanos: con el reloj de Windows atrasado, ventas y cortes quedan con fecha equivocada.
+            String avisoReloj = turnos.avisoRelojAtrasado();
+            if (avisoReloj != null) {
+                Alertas.advertencia(avisoReloj);
+            }
             Optional<Turno> abierto = turnos.turnoAbierto();
             if (abierto.isEmpty()) {
                 TurnoController tc = Navegador.ir("turno");
@@ -109,6 +114,6 @@ public final class Flujo {
     /** Muestra un error de BD sin stack trace al usuario y lo deja en el log. */
     public static void errorDatos(Exception e) {
         LOG.log(Level.SEVERE, "Error de datos", e);
-        Alertas.error("Ocurrió un problema con la base de datos.\n\n" + e.getMessage());
+        Alertas.error(com.fgsistemas.pos.util.Registro.mensajeBaseDeDatos(e));
     }
 }

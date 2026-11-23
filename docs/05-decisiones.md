@@ -136,3 +136,37 @@ Este archivo **manda** sobre el resto de los docs si hay contradicción.
     (incluidos inactivos).
 58. Los servicios ubican las carpetas `respaldos\` e `img\` junto a la BD abierta (en la app es
     `%LOCALAPPDATA%\FGSistemas\POS\`); así las pruebas nunca tocan los datos reales.
+
+## Fase 9 (Pulido y errores humanos)
+59. **Devolución parcial** desde `F11` (`D`, o `Shift+D` por folio para ventas de turnos ya cortados). El reembolso
+    es en **efectivo** y queda como retiro de caja del turno actual; necesita autorización de admin si es cajero.
+60. Reembolso **proporcional** a lo cobrado del producto y al descuento de la venta (HALF_UP); la suma de las
+    devoluciones nunca pasa del total cobrado.
+61. Ventas con parte **a fiado** no se devuelven por partes (se cancelan completas). Una venta con devoluciones
+    ya no se puede cancelar. Kardex con tipo nuevo `DEVOLUCION` (migración V2, que reconstruye
+    `movimientos_inventario` para ampliar el CHECK).
+62. La **ganancia** del Resumen y del corte descuenta lo devuelto (importe − costo de lo devuelto).
+63. **Topes de captura**: 999,999 unidades y $999,999.99 por campo. Un código de barras escaneado en un campo
+    de cantidad o de dinero se rechaza.
+64. **Avisos con confirmación** (foco en No) para cifras sospechosas: cantidades grandes, cambio de más de $1,000,
+    precio 5× distinto o bajo el costo, costo 3× distinto o sobre el precio, fondo 5× el anterior, diferencia de
+    corte grande (sugiere recontar sin revelar la cifra), factura repetida, producto con nombre repetido.
+    Lista completa en `docs/06-errores-humanos.md`.
+65. **No se saca de la caja más efectivo del que hay**: retiros, gastos, pagos de mercancía y reembolsos.
+66. **Registro de errores** en `logs\pos0.log` … `pos4.log` (2 MB c/u, `pos0.log` es el más reciente). Los errores
+    inesperados muestran un mensaje en español y el detalle va al log. Los errores de BD se traducen
+    (ocupada, disco lleno, sin permisos, dañada).
+67. **Una sola instancia** (candado `pos.lock`); avisos de Bloq Mayús en el login, de reloj de Windows atrasado
+    al iniciar sesión, y al cerrar la ventana con una venta/entrada/configuración sin guardar.
+68. **Empaquetado** con `empaquetar.ps1` (jpackage, trae su propio Java): carpeta + `.zip`; instalador `.exe` solo si
+    está WiX Toolset 3. Antes de migrar el esquema de una BD con datos se copia a
+    `respaldos\pos_…_antes-de-actualizar-vN.db`.
+69. **Importar productos desde Excel** (Inventario, `Ctrl+I`, admin): lee la plantilla de inventario (hojas
+    "Inventario" y "Productos nuevos") o cualquier hoja con columna "Producto". Primero muestra una **vista previa**
+    (se da de alta / ya existe / error por fila) y no guarda nada hasta confirmar con `F10`.
+70. Fila sin precio y sin cantidad = producto que la tienda no vende: se ignora. Fila con cantidad pero sin precio =
+    error. La fila de ejemplo (EJ01 / "EJEMPLO…") y la de total se ignoran.
+71. Solo se **dan de alta productos nuevos**: un código que ya existe se omite y nunca se sobrescribe. Sin código se
+    busca por nombre (para no duplicar al importar dos veces) y si no existe se genera `NV001`, `NV002`…
+72. Todo o nada: las filas válidas se guardan en una sola transacción; el stock entra al kardex como AJUSTE
+    "Inventario inicial (Excel)" y queda en bitácora `IMPORTAR_PRODUCTOS`.

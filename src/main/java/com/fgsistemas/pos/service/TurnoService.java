@@ -55,6 +55,32 @@ public class TurnoService {
         return turno;
     }
 
+    /** Fondo del último turno, si hubo (para el aviso de fondo inusual). */
+    public Optional<Long> ultimoFondo() throws SQLException {
+        try (Connection c = Database.conectar()) {
+            return turnoDao.ultimoFondo(c);
+        }
+    }
+
+    /**
+     * Si la fecha de la PC es anterior a la última venta o turno registrado (reloj atrasado o mal configurado),
+     * regresa un aviso; si no, null. Las ventas quedarían con fecha equivocada y los reportes saldrían mal.
+     */
+    public String avisoRelojAtrasado() throws SQLException {
+        Optional<java.time.LocalDateTime> ultima;
+        try (Connection c = Database.conectar()) {
+            ultima = turnoDao.ultimaFechaRegistrada(c);
+        }
+        java.time.LocalDateTime ahora = Fechas.ahora();
+        if (ultima.isEmpty() || !ultima.get().isAfter(ahora.plusMinutes(5))) {
+            return null;
+        }
+        return "La fecha y hora de esta computadora (" + Fechas.FECHA_HORA.format(ahora) + ") es ANTERIOR al último "
+                + "movimiento registrado (" + Fechas.FECHA_HORA.format(ultima.get()) + ").\n\n"
+                + "Corrige la fecha y hora de Windows antes de vender; si no, las ventas y cortes quedarán con "
+                + "fecha equivocada.";
+    }
+
     /** Continúa en el turno abierto (propio o de otro usuario). Las ventas quedan con el usuario actual. */
     public void continuar(Turno turno) throws SQLException {
         Usuario usuario = requiereSesion();

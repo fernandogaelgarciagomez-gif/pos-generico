@@ -37,7 +37,14 @@
 ## Validaciones
 - Código único. Precio > 0. Costo ≥ 0. Advertir si precio < costo (permitir, pero confirmar).
 
+## Importar de Excel (Fase 9, decisiones 69–72)
+- `Ctrl+I` (admin): elegir el `.xlsx` → vista previa con cada fila (se da de alta / ya existe / error y por qué),
+  el total de productos nuevos y su valor a costo → `F10` importa todo en una sola operación.
+- Pensado para el inventario inicial con la plantilla "Inventario - <negocio>.xlsx" (269 productos típicos;
+  se llenan precio, costo y cantidad). Se puede volver a importar el mismo archivo corregido: lo ya importado se omite.
+
 ## Criterios de aceptación
 - [ ] Búsqueda instantánea con 5,000 productos (índices en BD).
 - [ ] Alertas visibles y correctas.
 - [ ] Cajero no puede editar ni ver costos.
+- [ ] Importar el Excel del inventario da de alta los productos con su stock y no duplica al repetirlo.

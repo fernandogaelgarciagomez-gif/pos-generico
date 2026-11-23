@@ -69,6 +69,9 @@ public class EntradaService {
             if (l.costoUnitario() < 0) {
                 throw new IllegalArgumentException("El costo no puede ser negativo.");
             }
+            if (l.cantidad() > Cantidad.MAXIMO) {
+                throw new IllegalArgumentException(Cantidad.MENSAJE_MAXIMO);
+            }
             porProducto.merge(l.productoId(), l,
                     (a, b) -> new Linea(a.productoId(), a.cantidad() + b.cantidad(), b.costoUnitario()));
         }
@@ -78,6 +81,9 @@ public class EntradaService {
         Long turnoId = Sesion.turno() == null ? null : Sesion.turno().getId();
 
         return Database.enTransaccion(c -> {
+            if (pagadoDeCaja) {
+                EfectivoEnCaja.exigir(c, turnoId, total, "pagar esta mercancía");
+            }
             long entradaId = entradaDao.insertar(c, usuarioId, proveedor, factura, notas, total);
             List<CambioCosto> cambios = new ArrayList<>();
             for (Linea l : finales) {
@@ -106,6 +112,21 @@ public class EntradaService {
                     + (pagadoDeCaja ? " · pagada de la caja" : ""));
             return new Resultado(entradaId, total, cambios);
         });
+    }
+
+    /**
+     * ¿Ya se registró esa factura de ese proveedor? (errores humanos: capturar dos veces la misma compra).
+     *
+     * @return descripción de la entrada anterior, o vacío
+     */
+    public java.util.Optional<String> facturaYaRegistrada(String proveedor, String factura) throws SQLException {
+        Sesion.requiere(Permiso.ENTRADA_MERCANCIA);
+        if (factura == null || factura.isBlank()) {
+            return java.util.Optional.empty();
+        }
+        try (Connection c = Database.conectar()) {
+            return entradaDao.buscarFactura(c, proveedor, factura.trim());
+        }
     }
 
     public List<String> proveedores() throws SQLException {

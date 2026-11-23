@@ -115,6 +115,22 @@ public class InventarioService {
         });
     }
 
+    /**
+     * ¿Ya hay otro producto con ese nombre? (errores humanos: dar de alta dos veces lo mismo con otro código).
+     *
+     * @return descripción del otro producto, o vacío
+     */
+    public Optional<String> otroProductoConNombre(String nombre, long excluirId) throws SQLException {
+        Sesion.requiere(Permiso.VER_INVENTARIO);
+        if (nombre == null || nombre.isBlank()) {
+            return Optional.empty();
+        }
+        try (Connection c = Database.conectar()) {
+            return productoDao.buscarOtroConNombre(c, nombre, excluirId)
+                    .map(p -> p.getNombre() + " (código " + p.getCodigo() + (p.isActivo() ? "" : ", inactivo") + ")");
+        }
+    }
+
     /** Categorías con cuántos productos usan cada una (Configuración → Inventario). */
     public List<CategoriaDao.ConConteo> categoriasConConteo() throws SQLException {
         Sesion.requiere(Permiso.EDITAR_INVENTARIO);
@@ -338,7 +354,7 @@ public class InventarioService {
 
     // ---------------------------------------------------------------- validación
 
-    private static Producto normalizarYValidar(Producto datos) {
+    static Producto normalizarYValidar(Producto datos) {
         Producto p = datos.copia();
         List<String> errores = new ArrayList<>();
         agregar(errores, Validacion.codigoProducto(p.getCodigo()));
@@ -368,7 +384,7 @@ public class InventarioService {
         return p;
     }
 
-    private static void validarCantidadSegunTipo(long milesimas, TipoVenta tipo, String campo) {
+    static void validarCantidadSegunTipo(long milesimas, TipoVenta tipo, String campo) {
         if (!tipo.aceptaDecimales() && milesimas % Cantidad.UNO != 0) {
             throw new IllegalArgumentException(campo + " debe ser un número entero (se vende por pieza).");
         }

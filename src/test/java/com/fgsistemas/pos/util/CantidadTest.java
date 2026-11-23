@@ -34,6 +34,9 @@ class CantidadTest {
     void rechazaInvalidas() {
         assertThrows(IllegalArgumentException.class, () -> Cantidad.parsear("", TipoVenta.PESO));
         assertThrows(IllegalArgumentException.class, () -> Cantidad.parsear("-1", TipoVenta.PESO));
+        // Un código de barras escaneado en el campo de cantidad se rechaza (Fase 9).
+        assertThrows(IllegalArgumentException.class, () -> Cantidad.parsear("7501055300846", TipoVenta.PIEZA));
+        assertEquals(Cantidad.MAXIMO, Cantidad.parsear("999999", TipoVenta.PIEZA));
         assertThrows(IllegalArgumentException.class, () -> Cantidad.parsear("0.0001", TipoVenta.PESO));
         assertThrows(IllegalArgumentException.class, () -> Cantidad.parsear("dos", TipoVenta.PIEZA));
     }

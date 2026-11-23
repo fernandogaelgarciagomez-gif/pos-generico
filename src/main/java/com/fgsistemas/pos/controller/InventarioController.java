@@ -200,6 +200,12 @@ public class InventarioController {
                     new KeyCodeCombination(KeyCode.DELETE), true, this::cambiarActivo);
             Acciones.agregar(barraAcciones, raiz, "Lista de compras", "F8", new KeyCodeCombination(KeyCode.F8),
                     false, ProductoDialogos::listaDeCompras);
+            Acciones.agregar(barraAcciones, raiz, "Importar de Excel", "Ctrl+I",
+                    new KeyCodeCombination(KeyCode.I, KeyCombination.SHORTCUT_DOWN), false, () -> {
+                        if (ImportarDialogos.importar()) {
+                            cargar(null);
+                        }
+                    });
         }
         Acciones.agregar(barraAcciones, raiz, "Solo stock bajo", "F5", new KeyCodeCombination(KeyCode.F5), false,
                 () -> chkStockBajo.setSelected(!chkStockBajo.isSelected()));

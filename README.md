@@ -19,9 +19,17 @@ mvn clean javafx:run
 mvn test
 ```
 
+## Generar el programa para la tienda
+```
+powershell -ExecutionPolicy Bypass -File .\empaquetar.ps1
+```
+Corre las pruebas y deja en `target\instalador\` la carpeta **Punto de Venta** (con `Punto de Venta.exe`
+y su propio Java, no hay que instalar nada más) y un `.zip` para copiarla. Si está instalado
+[WiX Toolset 3](https://wixtoolset.org/), también genera un instalador `.exe` con acceso directo.
+
 ## Datos
 La base de datos, respaldos, logs e imágenes viven en `%LOCALAPPDATA%\FGSistemas\POS\`
-(fuera del proyecto y de OneDrive). Las exportaciones (Excel y PDF) van a
+(fuera del proyecto y de OneDrive). El registro de errores está en `logs\pos0.log` (el más reciente). Las exportaciones (Excel y PDF) van a
 `Documentos\Punto de Venta\Exportaciones\`.
 
 ## Contenido
@@ -34,4 +42,6 @@ La base de datos, respaldos, logs e imágenes viven en `%LOCALAPPDATA%\FGSistema
 | docs/03-diseno-ui.md | Diseño azul marino |
 | docs/04-teclado-y-atajos.md | Uso 100% con teclado |
 | docs/05-decisiones.md | Decisiones tomadas (peso/fracción, carpeta de datos, PDF, etc.) |
+| docs/06-errores-humanos.md | Errores humanos previstos y cómo se previenen |
+| empaquetar.ps1 | Genera el programa para instalar en la tienda |
 | docs/modulos/*.md | Cada pantalla, con criterios de aceptación |

@@ -83,6 +83,7 @@ src/test/java/...          -> pruebas JUnit 5 de servicios
 - `docs/03-diseno-ui.md` — paleta y componentes
 - `docs/04-teclado-y-atajos.md` — navegación sin mouse
 - `docs/05-decisiones.md` — decisiones tomadas con el cliente (manda sobre lo demás)
+- `docs/06-errores-humanos.md` — errores humanos previstos y su protección (revisar al agregar pantallas)
 - `docs/modulos/` — especificación de cada pantalla con criterios de aceptación
 
 ## Si tienes dudas

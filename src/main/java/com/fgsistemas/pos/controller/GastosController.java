@@ -150,7 +150,8 @@ public class GastosController {
                 .campo("Detalle", txtDetalle)
                 .nota("Categoría: ↑ ↓ o teclas 1–" + categorias.size() + ". El detalle es obligatorio en \"" + otro + "\"."
                         + (gasto && !Sesion.tiene(Permiso.RETIROS_CAJA)
-                        ? " Los gastos piden autorización de un administrador." : ""));
+                        ? " Los gastos piden autorización de un administrador." : "")
+                        + (gasto ? VentaDialogos.textoEfectivoEnCaja(servicio) : ""));
         // Teclas 1–9 eligen la categoría solo con el foco en ella (en Monto los números se escriben).
         cmb.addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, e -> {
             String t = e.getText();

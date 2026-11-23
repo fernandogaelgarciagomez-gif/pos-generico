@@ -151,6 +151,17 @@ public class ResumenDao {
                 }
             }
         }
+        // Devoluciones parciales (Fase 9): lo devuelto deja de ser ganancia. El reembolso ya trae el descuento.
+        try (PreparedStatement ps = c.prepareStatement(
+                "SELECT dd.importe, dd.costo_unitario, dd.cantidad FROM devolucion_detalle dd "
+                        + "JOIN devoluciones d ON d.id = dd.devolucion_id WHERE " + f.donde("d"))) {
+            f.parametros(ps, 1);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    suma -= rs.getLong(1) - Cantidad.importe(rs.getLong(2), rs.getLong(3));
+                }
+            }
+        }
         return suma;
     }
 

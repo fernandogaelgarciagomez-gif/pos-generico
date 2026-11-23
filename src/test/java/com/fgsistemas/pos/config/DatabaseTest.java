@@ -22,7 +22,8 @@ class DatabaseTest {
     private static final List<String> TABLAS = List.of(
             "schema_version", "negocio", "usuarios", "categorias", "productos", "clientes",
             "turnos", "ventas", "venta_detalle", "venta_pagos", "abonos", "entradas_mercancia",
-            "entrada_detalle", "movimientos_inventario", "movimientos_caja", "cortes", "bitacora");
+            "entrada_detalle", "movimientos_inventario", "movimientos_caja", "cortes", "bitacora",
+            "devoluciones", "devolucion_detalle");
 
     @TempDir
     Path tmp;
@@ -107,5 +108,45 @@ class DatabaseTest {
         assertEquals(2, s.size());
         assertTrue(s.get(0).contains("'a;b'"));
         assertTrue(s.get(1).contains("'it''s'"));
+    }
+
+    /** Una BD creada con la versión 1 (con datos) pasa a la versión 2 sin perder el kardex (Fase 9). */
+    @Test
+    void migraDeV1aV2ConservandoElKardex() throws Exception {
+        Path archivo = tmp.resolve("v1.db");
+        try (Connection c = java.sql.DriverManager.getConnection("jdbc:sqlite:" + archivo);
+             Statement st = c.createStatement()) {
+            String v1;
+            try (java.io.InputStream in = Migraciones.class.getResourceAsStream("/db/V1__esquema_inicial.sql")) {
+                v1 = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            }
+            st.execute("CREATE TABLE schema_version (version INTEGER NOT NULL)");
+            for (String sql : Migraciones.dividir(v1)) {
+                st.execute(sql);
+            }
+            st.execute("INSERT INTO schema_version (version) VALUES (1)");
+            st.execute("INSERT INTO usuarios (id, nombre, usuario, password_hash, rol, creado_en) "
+                    + "VALUES (1, 'Ana', 'ana', 'x', 'ADMIN', '2026-01-01T00:00:00')");
+            st.execute("INSERT INTO productos (id, codigo, nombre, precio_venta, creado_en) "
+                    + "VALUES (1, 'A1', 'Prod', 100, '2026-01-01T00:00:00')");
+            st.execute("INSERT INTO movimientos_inventario (producto_id, tipo, cantidad, stock_resultante, usuario_id, "
+                    + "motivo, fecha) VALUES (1, 'AJUSTE', 5000, 5000, 1, 'Stock inicial', '2026-01-01T00:00:00')");
+        }
+        Database.inicializar(archivo);
+        try (java.util.stream.Stream<Path> respaldos = Files.list(tmp.resolve("respaldos"))) {
+            assertTrue(respaldos.anyMatch(p -> p.getFileName().toString().contains("antes-de-actualizar-v1")),
+                    "se respalda la BD antes de cambiar su esquema");
+        }
+        try (Connection c = Database.conectar(); Statement st = c.createStatement()) {
+            assertEquals(Migraciones.versionMasReciente(), Migraciones.versionActual(c));
+            try (ResultSet rs = st.executeQuery("SELECT tipo, cantidad, motivo FROM movimientos_inventario")) {
+                assertTrue(rs.next());
+                assertEquals("AJUSTE", rs.getString(1));
+                assertEquals(5000, rs.getLong(2));
+                assertEquals("Stock inicial", rs.getString(3));
+            }
+            st.execute("INSERT INTO movimientos_inventario (producto_id, tipo, cantidad, stock_resultante, usuario_id, "
+                    + "fecha) VALUES (1, 'DEVOLUCION', 1000, 6000, 1, '2026-01-02T00:00:00')");
+        }
     }
 }

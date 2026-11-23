@@ -105,6 +105,11 @@ public class VentaService {
         if (carrito == null || carrito.vacio()) {
             throw new IllegalArgumentException("La venta no tiene productos.");
         }
+        for (Carrito.Renglon r : carrito.getRenglones()) {
+            if (r.getCantidad() <= 0 || r.getCantidad() > Cantidad.MAXIMO) {
+                throw new IllegalArgumentException("Revisa la cantidad de \"" + r.getProducto().getNombre() + "\".");
+            }
+        }
         long subtotal = carrito.subtotal();
         long descuento = carrito.getDescuento();
         if (descuento > subtotal) {
@@ -281,6 +286,11 @@ public class VentaService {
             if (!"ABIERTO".equals(v.turnoEstado())) {
                 throw new IllegalArgumentException("La venta #" + v.folio() + " es de un turno ya cortado: "
                         + "no se puede cancelar (haz una devolución en el turno actual).");
+            }
+            if (new com.fgsistemas.pos.dao.DevolucionDao().totalDevuelto(c, ventaId) > 0) {
+                // Errores humanos: cancelar después de una devolución regresaría stock y dinero dos veces.
+                throw new IllegalArgumentException("La venta #" + v.folio() + " ya tiene devoluciones: no se puede "
+                        + "cancelar completa. Devuelve los productos que faltan (D).");
             }
             ventaDao.marcarCancelada(c, ventaId, usuarioId, autorizo, motivo.trim());
             for (VentaDao.DetalleCrudo d : ventaDao.detalleCrudo(c, ventaId)) {

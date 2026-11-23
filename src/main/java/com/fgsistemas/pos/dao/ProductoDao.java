@@ -162,4 +162,16 @@ public class ProductoDao {
         p.setCreadoEn(Fechas.deTexto(rs.getString("creado_en")));
         return p;
     }
+
+    /** Otro producto (distinto de {@code excluirId}) con el mismo nombre, sin distinguir mayúsculas ni espacios. */
+    public Optional<Producto> buscarOtroConNombre(Connection c, String nombre, long excluirId) throws SQLException {
+        try (PreparedStatement ps = c.prepareStatement(SELECT
+                + "WHERE TRIM(p.nombre) = ? COLLATE NOCASE AND p.id <> ? LIMIT 1")) {
+            ps.setString(1, nombre.trim());
+            ps.setLong(2, excluirId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? Optional.of(mapear(rs)) : Optional.empty();
+            }
+        }
+    }
 }

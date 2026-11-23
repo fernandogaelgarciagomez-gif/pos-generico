@@ -13,6 +13,12 @@ import java.util.regex.Pattern;
 public final class Dinero {
 
     private static final Locale MX = Locale.forLanguageTag("es-MX");
+    /**
+     * Máximo que se puede capturar: $999,999.99.
+     * DECISION (Fase 9, errores humanos): un código de barras escaneado en un campo de dinero (fondo, recibido,
+     * precio…) queda fuera de rango y se rechaza.
+     */
+    public static final long MAXIMO = 99_999_999L;
     private static final Pattern MONTO = Pattern.compile("-?(\\d+(\\.\\d{0,2})?|\\.\\d{1,2})");
 
     private Dinero() {
@@ -43,11 +49,17 @@ public final class Dinero {
         if (!MONTO.matcher(limpio).matches()) {
             throw new IllegalArgumentException("Monto inválido: " + texto.trim());
         }
+        long centavos;
         try {
-            return new BigDecimal(limpio).movePointRight(2).longValueExact();
+            centavos = new BigDecimal(limpio).movePointRight(2).longValueExact();
         } catch (ArithmeticException | NumberFormatException e) {
             throw new IllegalArgumentException("Monto inválido: " + texto.trim());
         }
+        if (Math.abs(centavos) > MAXIMO) {
+            throw new IllegalArgumentException("El monto es demasiado grande (máximo " + formatear(MAXIMO)
+                    + "). ¿Se escaneó un código en el campo?");
+        }
+        return centavos;
     }
 
     /** Porcentaje (0–100) de un monto, redondeado HALF_UP a centavos. */

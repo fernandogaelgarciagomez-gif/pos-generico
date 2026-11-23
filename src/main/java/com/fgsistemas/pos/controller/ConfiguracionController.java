@@ -141,6 +141,7 @@ public class ConfiguracionController {
         cargarRespaldos();
         vigilarCambios(txtNombre, txtDireccion, txtTelefono, txtRfc, txtMensaje, txtStockMinimo, txtDescuento, txtDias);
         vigilarCambios(chkStockNegativo, chkTarjeta, chkTransferencia, chkFiado, chkRespaldoAuto);
+        Navegador.alCerrarAvisar(() -> sucio ? "Hay cambios sin guardar en Configuración." : null);
         Teclado.enfocar(txtNombre);
     }
 

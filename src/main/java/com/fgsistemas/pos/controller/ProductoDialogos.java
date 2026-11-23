@@ -5,6 +5,7 @@ import com.fgsistemas.pos.model.Producto;
 import com.fgsistemas.pos.model.TipoVenta;
 import com.fgsistemas.pos.service.ExportService.Cant;
 import com.fgsistemas.pos.service.ExportService.Monto;
+import com.fgsistemas.pos.service.Avisos;
 import com.fgsistemas.pos.service.InventarioService;
 import com.fgsistemas.pos.service.InventarioService.TipoAjuste;
 import com.fgsistemas.pos.service.PermisoDenegadoException;
@@ -156,10 +157,37 @@ final class ProductoDialogos {
             } catch (IllegalArgumentException e) {
                 return e.getMessage();
             }
-            if (p.getPrecioVenta() > 0 && p.getPrecioVenta() < p.getCosto()
-                    && !Alertas.confirmar("El precio (" + Dinero.formatear(p.getPrecioVenta())
-                    + ") es menor que el costo (" + Dinero.formatear(p.getCosto()) + ").\n¿Guardar de todos modos?")) {
-                return "Revisa el precio y el costo.";
+            // Errores humanos (Fase 9): precio con un cero de más o de menos, precio bajo el costo, costo de la
+            // caja en vez de la unidad, stock inicial raro, o el mismo producto dado de alta dos veces.
+            if (p.getPrecioVenta() > 0) {
+                String avisoPrecio = Avisos.precio(p.getPrecioVenta(), nuevo ? 0 : existente.getPrecioVenta(),
+                        p.getCosto());
+                if (avisoPrecio != null && !Alertas.confirmarPeligro(avisoPrecio)) {
+                    return "Revisa el precio y el costo.";
+                }
+            }
+            if (!nuevo) {
+                String avisoCosto = Avisos.costo(p.getCosto(), existente.getCosto(), 0);
+                if (avisoCosto != null && !Alertas.confirmarPeligro(avisoCosto)) {
+                    return "Revisa el costo.";
+                }
+            }
+            if (nuevo) {
+                String avisoStock = Cantidad.avisoCantidadInusual(p.getStock(), p.getTipoVenta(),
+                        cmbUnidad.getEditor().getText());
+                if (avisoStock != null && !Alertas.confirmarPeligro("Stock inicial\n\n" + avisoStock)) {
+                    return "Revisa el stock inicial.";
+                }
+            }
+            try {
+                Optional<String> otro = servicio.otroProductoConNombre(p.getNombre(), nuevo ? -1 : existente.getId());
+                if (otro.isPresent() && !Alertas.confirmarPeligro("Ya existe un producto con ese nombre:\n"
+                        + otro.get() + "\n\n¿Guardar de todos modos?")) {
+                    return "Ya existe un producto con ese nombre.";
+                }
+            } catch (SQLException e) {
+                Flujo.errorDatos(e);
+                return "No se pudo revisar el nombre.";
             }
             String categoria = cmbCategoria.getEditor().getText();
             try {
@@ -258,6 +286,10 @@ final class ProductoDialogos {
                     try {
                         long q = txtCantidad.getText().isBlank() ? 0
                                 : Cantidad.parsear(txtCantidad.getText(), p.getTipoVenta());
+                        String aviso = Cantidad.avisoCantidadInusual(q, p.getTipoVenta(), p.getUnidad());
+                        if (aviso != null && !Alertas.confirmarPeligro(p.getNombre() + "\n\n" + aviso)) {
+                            return "Revisa la cantidad.";
+                        }
                         long resultado = servicio.ajustarStock(p.getId(), cmbTipo.getValue(), q,
                                 cmbMotivo.getEditor().getText());
                         Alertas.toast("Stock de " + p.getNombre() + ": " + p.formatear(resultado));
@@ -309,6 +341,7 @@ final class ProductoDialogos {
             case "CANCELACION" -> "Cancelación";
             case "ENTRADA" -> "Entrada";
             case "AJUSTE" -> "Ajuste";
+            case "DEVOLUCION" -> "Devolución";
             default -> tipo;
         };
     }
@@ -317,6 +350,7 @@ final class ProductoDialogos {
         String ref = m.referenciaId() == null ? "" : switch (m.tipo()) {
             case "VENTA", "CANCELACION" -> "Venta #" + m.referenciaId();
             case "ENTRADA" -> "Entrada #" + m.referenciaId();
+            case "DEVOLUCION" -> "Devolución #" + m.referenciaId();
             default -> "#" + m.referenciaId();
         };
         String motivo = m.motivo() == null ? "" : m.motivo();

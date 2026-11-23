@@ -9,6 +9,7 @@ import com.fgsistemas.pos.service.TicketService;
 import com.fgsistemas.pos.service.VentaService;
 import com.fgsistemas.pos.service.VentaService.Pago;
 import com.fgsistemas.pos.service.VentaService.VentaRegistrada;
+import com.fgsistemas.pos.util.Navegador;
 import com.fgsistemas.pos.util.Acciones;
 import com.fgsistemas.pos.util.Alertas;
 import com.fgsistemas.pos.util.Cantidad;
@@ -87,6 +88,8 @@ public class VenderController {
         configurarAcciones();
         cargarCatalogo();
         refrescar();
+        Navegador.alCerrarAvisar(() -> carrito.vacio() ? null
+                : "Hay una venta sin cobrar con " + carrito.getRenglones().size() + " productos.");
         Teclado.enfocar(txtCodigo);
     }
 
@@ -334,6 +337,12 @@ public class VenderController {
         txtCodigo.requestFocus();
     }
 
+    /** Errores humanos: "50" en vez de "5" o un código en la cantidad. Pide confirmar cantidades raras. */
+    private static boolean cantidadConfirmada(Producto p, long cantidad) {
+        String aviso = Cantidad.avisoCantidadInusual(cantidad, p.getTipoVenta(), p.getUnidad());
+        return aviso == null || Alertas.confirmarPeligro(p.getNombre() + "\n\n" + aviso);
+    }
+
     /** Agrega un producto con la cantidad indicada en la captura (o la pide si es a granel). */
     private void agregar(Producto p, Captura cap) {
         long cantidad;
@@ -362,6 +371,10 @@ public class VenderController {
         }
         if (cantidad <= 0) {
             aviso("La cantidad debe ser mayor a cero.");
+            return;
+        }
+        if (!cantidadConfirmada(p, cantidad)) {
+            txtCodigo.requestFocus();
             return;
         }
         if (!hayStock(p, carrito.cantidadDe(p.getId()) + cantidad)) {
@@ -467,7 +480,7 @@ public class VenderController {
             return;
         }
         Optional<Long> q = VentaDialogos.pedirCantidad(r.getProducto(), r.getCantidad());
-        if (q.isPresent()) {
+        if (q.isPresent() && cantidadConfirmada(r.getProducto(), q.get())) {
             long otros = carrito.cantidadDe(r.getProducto().getId()) - r.getCantidad();
             if (hayStock(r.getProducto(), otros + q.get())) {
                 carrito.cambiarCantidad(r, q.get());
