@@ -134,6 +134,9 @@ final class ProductoDialogos {
         if (nuevo) {
             f.campo("Stock inicial", txtStock);
         }
+        if (nuevo && codigoInicial != null && !codigoInicial.isBlank()) {
+            f.enfocarAlAbrir(txtNombre); // el código ya viene (escaneado): empezar por el nombre
+        }
         f.campo("Stock mínimo", txtMinimo)
                 .nota("Se vende por: ↑ ↓ para cambiar (Pieza = enteros; Peso/Fracción = hasta 3 decimales). "
                         + "Precio y costo son por unidad (por kg, por metro…). "

@@ -852,10 +852,20 @@ final class VentaDialogos {
             }
             tabla.requestFocus();
         };
+        Runnable reimprimir = () -> {
+            Venta.Resumen sel = tabla.getSelectionModel().getSelectedItem();
+            if (sel != null) {
+                Impresion.reimprimir(sel.id());
+            }
+            tabla.requestFocus();
+        };
         tabla.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
             if (e.getCode() == KeyCode.ENTER) {
                 e.consume();
                 verDetalle.run();
+            } else if (e.getCode() == KeyCode.P && !e.isControlDown()) {
+                e.consume();
+                reimprimir.run();
             } else if (e.getCode() == KeyCode.C && !e.isControlDown()) {
                 e.consume();
                 cancelarDirecto.run();
@@ -875,6 +885,7 @@ final class VentaDialogos {
         });
         Tablas.dialogo("Ventas del turno", null, tabla, pie, 1000, 560, List.of(
                 Acciones.boton("Ver detalle", "Enter", verDetalle),
+                Acciones.boton("Reimprimir ticket", "P", reimprimir),
                 Acciones.boton("Cancelar venta", "C", cancelarDirecto),
                 Acciones.boton("Devolver productos", "D", devolver),
                 Acciones.boton("Devolución por folio", "Shift+D", devolverPorFolio)));
@@ -935,6 +946,13 @@ final class VentaDialogos {
 
         boolean[] cancelada = new boolean[1];
         List<Button> extras = new ArrayList<>();
+        extras.add(Acciones.boton("Reimprimir ticket", "P", () -> Impresion.reimprimir(v.id())));
+        tabla.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
+            if (e.getCode() == KeyCode.P && !e.isControlDown()) {
+                e.consume();
+                Impresion.reimprimir(v.id());
+            }
+        });
         if (permitirCancelar && !v.cancelada()) {
             Button btn = Acciones.boton("Cancelar esta venta", "C", () -> { });
             btn.getStyleClass().add("boton-peligro");

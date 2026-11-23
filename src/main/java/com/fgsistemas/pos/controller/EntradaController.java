@@ -12,6 +12,7 @@ import com.fgsistemas.pos.util.Navegador;
 import com.fgsistemas.pos.util.Acciones;
 import com.fgsistemas.pos.util.Alertas;
 import com.fgsistemas.pos.util.Cantidad;
+import com.fgsistemas.pos.util.CodigoBarras;
 import com.fgsistemas.pos.util.Dinero;
 import com.fgsistemas.pos.util.Teclado;
 import javafx.collections.FXCollections;
@@ -205,7 +206,7 @@ public class EntradaController {
     // ------------------------------------------------------------------ captura
 
     private void procesarCodigo() {
-        String codigo = txtCodigo.getText().trim();
+        String codigo = CodigoBarras.limpiar(txtCodigo.getText());
         if (codigo.isEmpty()) {
             return;
         }

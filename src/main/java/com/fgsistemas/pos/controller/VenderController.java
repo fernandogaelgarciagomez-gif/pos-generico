@@ -1,11 +1,12 @@
 package com.fgsistemas.pos.controller;
 
+import com.fgsistemas.pos.config.Hardware;
 import com.fgsistemas.pos.model.Carrito;
+import com.fgsistemas.pos.model.MetodoPago;
 import com.fgsistemas.pos.model.Negocio;
 import com.fgsistemas.pos.model.Producto;
 import com.fgsistemas.pos.service.InventarioService;
 import com.fgsistemas.pos.service.PermisoDenegadoException;
-import com.fgsistemas.pos.service.TicketService;
 import com.fgsistemas.pos.service.VentaService;
 import com.fgsistemas.pos.service.VentaService.Pago;
 import com.fgsistemas.pos.service.VentaService.VentaRegistrada;
@@ -14,8 +15,10 @@ import com.fgsistemas.pos.util.Acciones;
 import com.fgsistemas.pos.util.Alertas;
 import com.fgsistemas.pos.util.Cantidad;
 import com.fgsistemas.pos.util.Captura;
+import com.fgsistemas.pos.util.CodigoBarras;
 import com.fgsistemas.pos.util.Dinero;
 import com.fgsistemas.pos.util.Iniciales;
+import com.fgsistemas.pos.util.LectorCodigos;
 import com.fgsistemas.pos.util.Teclado;
 import com.fgsistemas.pos.util.Texto;
 import javafx.collections.FXCollections;
@@ -80,12 +83,17 @@ public class VenderController {
     private List<Producto> visibles = List.of();
     private Negocio config = new Negocio();
     private String categoriaElegida;
+    /** Última venta cobrada en esta pantalla (para reimprimir su ticket con Ctrl+P). */
+    private Long ultimaVentaId;
 
     @FXML
     private void initialize() {
         configurarTabla();
         configurarCampo();
         configurarAcciones();
+        if (Hardware.cargar().isCapturarLector()) {
+            LectorCodigos.capturarEn(raiz, txtCodigo);
+        }
         cargarCatalogo();
         refrescar();
         Navegador.alCerrarAvisar(() -> carrito.vacio() ? null
@@ -174,6 +182,8 @@ public class VenderController {
         cobrar.getStyleClass().add("boton-principal");
         Acciones.agregar(barraAcciones, raiz, "Ventas del turno / cancelar", "F11",
                 new KeyCodeCombination(KeyCode.F11), false, this::ventasDelTurno);
+        Acciones.agregar(barraAcciones, raiz, "Reimprimir ticket", "Ctrl+P",
+                new KeyCodeCombination(KeyCode.P, KeyCombination.SHORTCUT_DOWN), false, this::reimprimir);
         Acciones.agregar(barraAcciones, raiz, "Vaciar / Menú", "Esc", new KeyCodeCombination(KeyCode.ESCAPE),
                 false, this::escape);
     }
@@ -300,7 +310,8 @@ public class VenderController {
     // ------------------------------------------------------------------ captura
 
     private void procesar() {
-        String texto = txtCodigo.getText().trim();
+        // El lector de código de barras puede mandar caracteres de control antes/después del código.
+        String texto = CodigoBarras.limpiar(txtCodigo.getText());
         if (texto.isEmpty()) {
             return;
         }
@@ -311,8 +322,7 @@ public class VenderController {
             aviso(e.getMessage());
             return;
         }
-        Optional<Producto> exacto = catalogo.stream()
-                .filter(p -> p.getCodigo().equalsIgnoreCase(cap.codigo())).findFirst();
+        Optional<Producto> exacto = buscarPorCodigo(cap.codigo());
         if (exacto.isPresent()) {
             agregar(exacto.get(), cap);
             return;
@@ -329,6 +339,18 @@ public class VenderController {
             txtCodigo.requestFocus();
             txtCodigo.selectAll();
         }
+    }
+
+    /** Código exacto; si no, sus equivalentes (UPC-A de 12 dígitos = EAN-13 con 0 adelante, etc.). */
+    private Optional<Producto> buscarPorCodigo(String codigo) {
+        for (String variante : CodigoBarras.variantes(codigo)) {
+            Optional<Producto> p = catalogo.stream()
+                    .filter(x -> x.getCodigo().equalsIgnoreCase(variante)).findFirst();
+            if (p.isPresent()) {
+                return p;
+            }
+        }
+        return Optional.empty();
     }
 
     private void buscar(String texto) {
@@ -553,7 +575,9 @@ public class VenderController {
         }
         try {
             VentaRegistrada v = ventas.cobrar(carrito, pagos.get());
-            new TicketService().imprimir(v.id());
+            ultimaVentaId = v.id();
+            boolean efectivo = pagos.get().stream().anyMatch(p -> p.metodo() == MetodoPago.EFECTIVO);
+            Impresion.despuesDeCobrar(v.id(), efectivo);
             Alertas.toast("Venta #" + v.folio() + " registrada"
                     + (v.cambio() > 0 ? " · Cambio " + Dinero.formatear(v.cambio()) : ""));
             carrito.limpiar();
@@ -565,6 +589,28 @@ public class VenderController {
         } catch (SQLException e) {
             Flujo.errorDatos(e);
         }
+        txtCodigo.requestFocus();
+    }
+
+    /** Ctrl+P: reimprime el ticket de la última venta cobrada (o la más reciente del turno). */
+    private void reimprimir() {
+        Long id = ultimaVentaId;
+        if (id == null) {
+            try {
+                id = ventas.ventasDelTurno().stream().findFirst().map(r -> r.id()).orElse(null);
+            } catch (SQLException e) {
+                Flujo.errorDatos(e);
+                return;
+            } catch (PermisoDenegadoException e) {
+                Alertas.advertencia(e.getMessage());
+                return;
+            }
+        }
+        if (id == null) {
+            aviso("Aún no hay ventas en este turno para reimprimir.");
+            return;
+        }
+        Impresion.reimprimir(id);
         txtCodigo.requestFocus();
     }
 

@@ -191,3 +191,24 @@ Este archivo **manda** sobre el resto de los docs si hay contradicción.
 78. **Instalador más seguro**: revisa Windows 10/11, espacio (600 MB), memoria y pantalla (avisos), guarda un registro en
     `logs\instalacion.log`, y al final abre el programa y comprueba que siga vivo; si se cierra, explica qué hacer.
     Memoria máxima de Java fija en 768 MB (`-Xmx768m`) para que funcione igual en 32 bits.
+79. **Impresora de tickets térmica genérica** (ESC/POS, 58 mm = 32 columnas, 80 mm = 48): se instala en Windows con
+    su controlador o como "Genérico / Solo texto" y se elige en Configuración > Ticket y lector. `TicketService` arma el
+    ticket con `EscPos` y lo manda crudo con `javax.print` en un hilo aparte (la venta nunca espera a la impresora; si
+    falla, aviso y se reimprime). Página de códigos PC850 con tabla propia (acentos, ñ, ¿, ¡); opción "sin acentos"
+    para impresoras que no la soportan. Opciones: imprimir siempre / preguntar / nunca, cortar papel, abrir cajón al
+    cobrar en efectivo (pulso ESC p por la impresora). Reimprimir: `Ctrl+P` en Vender (última venta) y `P` en Ventas
+    del turno y en el detalle de una venta (sale marcado "REIMPRESIÓN"; si está cancelada, "VENTA CANCELADA").
+80. **Configuración de hardware por computadora** en `<datos>\hardware.properties` (no en la BD): el nombre de la
+    impresora es de cada Windows; restaurar un respaldo de otra PC no la cambia.
+81. **Lector de código de barras genérico** (USB/inalámbrico en modo teclado, el de fábrica: teclea el código + Enter).
+    No necesita controlador. Se quitan caracteres de control de prefijo/sufijo (`CodigoBarras.limpiar`). Al buscar,
+    un código numérico de 12+ dígitos también se busca con/sin ceros iniciales (UPC-A 12 = EAN-13 con 0 = GTIN-14),
+    en Vender, Entrada de mercancía y "Probar lector". En Vender, si el foco quedó fuera del campo de código, lo que
+    teclee el lector se manda al campo (`LectorCodigos`, se puede desactivar). No se permite dar de alta el mismo
+    código con y sin el 0 inicial (sería el mismo producto para el lector).
+    **Inventario**: escanear (o escribir un código y Enter) en el buscador elige el producto si existe; si no existe,
+    ofrece darlo de alta con ese código (también Ins/Ctrl+N con el código en el buscador). Con el código ya puesto,
+    el formulario empieza en "Nombre" (igual al crear desde Entrada de mercancía).
+82. **Probar lector** (Configuración > Ticket y lector, F9): muestra lo leído, el tipo (EAN-13, UPC-A, EAN-8, GTIN-14 o
+    interno, con dígito verificador) y a qué producto corresponde. Si salen símbolos cambiados es el idioma de teclado
+    del lector (configurarlo en Latinoamérica/Español con su manual).

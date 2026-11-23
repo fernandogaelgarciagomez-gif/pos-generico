@@ -31,6 +31,7 @@ final class Formulario {
     private final GridPane grid = new GridPane();
     private final Label lblError = new Label();
     private final List<Node> campos = new ArrayList<>();
+    private Node primerFoco;
 
     Formulario(String titulo, String textoGuardar) {
         dialogo.setTitle(titulo);
@@ -89,6 +90,12 @@ final class Formulario {
         return this;
     }
 
+    /** Campo que recibe el foco al abrir (por defecto, el primero). */
+    Formulario enfocarAlAbrir(Node control) {
+        primerFoco = control;
+        return this;
+    }
+
     Formulario nota(String texto) {
         Label nota = new Label(texto);
         nota.getStyleClass().add("texto-pequeno");
@@ -115,7 +122,8 @@ final class Formulario {
         List<Node> editables = campos.stream().filter(n -> !(n instanceof Label)).toList();
         if (!editables.isEmpty()) {
             Teclado.cadenaEnter(btnGuardar::fire, editables.toArray(new Node[0]));
-            dialogo.setOnShown(e -> editables.get(0).requestFocus());
+            Node inicial = primerFoco != null ? primerFoco : editables.get(0);
+            dialogo.setOnShown(e -> inicial.requestFocus());
         }
         Optional<ButtonType> r = dialogo.showAndWait();
         return r.isPresent() && r.get() == guardar;

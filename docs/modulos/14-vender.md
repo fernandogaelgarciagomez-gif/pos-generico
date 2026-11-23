@@ -59,7 +59,9 @@ Diálogo centrado con el total grande y métodos:
 2. Restar stock y registrar `movimientos_inventario` tipo VENTA.
 3. Si hay parte fiada: sumar a `clientes.saldo`.
 4. Toast "Venta #folio registrada · Cambio $X" y carrito limpio, foco en código.
-5. (Futuro: imprimir ticket. Dejar `TicketService.imprimir(venta)` como método vacío.)
+5. Ticket: si hay impresora térmica configurada (Configuración > Ticket y lector), se imprime según la opción
+   (siempre / preguntar / nunca) y, si se pagó en efectivo y está activado, se abre el cajón. `Ctrl+P` reimprime.
+   Si la impresora falla la venta ya quedó registrada: solo se avisa (05-decisiones.md #79).
 
 ## Otras acciones
 - **F4 Cliente**: buscar/asignar cliente a la venta (o crear uno rápido con nombre y teléfono).

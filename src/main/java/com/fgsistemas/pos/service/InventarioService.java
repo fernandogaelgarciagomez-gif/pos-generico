@@ -14,6 +14,7 @@ import com.fgsistemas.pos.model.Producto;
 import com.fgsistemas.pos.model.TipoVenta;
 import com.fgsistemas.pos.util.Cantidad;
 import com.fgsistemas.pos.util.Dinero;
+import com.fgsistemas.pos.util.CodigoBarras;
 import com.fgsistemas.pos.util.Sesion;
 
 import java.sql.Connection;
@@ -73,7 +74,14 @@ public class InventarioService {
             return Optional.empty();
         }
         try (Connection c = Database.conectar()) {
-            Optional<Producto> p = productoDao.buscarPorCodigo(c, codigo.trim()).filter(Producto::isActivo);
+            // Con o sin el 0 inicial de los códigos de barras (UPC-A de 12 = EAN-13 con 0 adelante).
+            Optional<Producto> p = Optional.empty();
+            for (String variante : CodigoBarras.variantes(codigo)) {
+                p = productoDao.buscarPorCodigo(c, variante).filter(Producto::isActivo);
+                if (p.isPresent()) {
+                    break;
+                }
+            }
             if (!Sesion.tiene(Permiso.EDITAR_INVENTARIO)) {
                 p.ifPresent(x -> x.setCosto(0));
             }
@@ -237,9 +245,7 @@ public class InventarioService {
         validarCantidadSegunTipo(p.getStock(), p.getTipoVenta(), "El stock inicial");
         long usuarioId = Sesion.usuario().getId();
         return Database.enTransaccion(c -> {
-            if (productoDao.existeCodigo(c, p.getCodigo(), -1)) {
-                throw new IllegalArgumentException("Ya existe un producto con el código " + p.getCodigo() + ".");
-            }
+            validarCodigoLibre(c, p.getCodigo(), -1);
             p.setCategoriaId(categoriaId(c, nombreCategoria));
             p.setActivo(true);
             productoDao.insertar(c, p);
@@ -253,6 +259,21 @@ public class InventarioService {
         });
     }
 
+    /**
+     * El código no puede repetirse, tampoco escrito con o sin el 0 inicial de los códigos de barras
+     * (036000291452 y 0036000291452 son el mismo producto para el lector).
+     */
+    private void validarCodigoLibre(Connection c, String codigo, long excluirId) throws SQLException {
+        for (String variante : CodigoBarras.variantes(codigo)) {
+            if (productoDao.existeCodigo(c, variante, excluirId)) {
+                throw new IllegalArgumentException(variante.equals(codigo)
+                        ? "Ya existe " + (excluirId < 0 ? "un" : "otro") + " producto con el código " + codigo + "."
+                        : "Ya existe un producto con el código " + variante + ", que es el mismo código de barras "
+                        + "que " + codigo + " (solo cambia el 0 inicial).");
+            }
+        }
+    }
+
     /** Edita datos generales. El stock NO cambia aquí (usar {@link #ajustarStock}). Cambio de precio → bitácora. */
     public void editar(Producto datos, String nombreCategoria) throws SQLException {
         Sesion.requiere(Permiso.EDITAR_INVENTARIO);
@@ -261,9 +282,7 @@ public class InventarioService {
         Database.enTransaccion(c -> {
             Producto actual = productoDao.buscarPorId(c, p.getId())
                     .orElseThrow(() -> new IllegalArgumentException("El producto ya no existe."));
-            if (productoDao.existeCodigo(c, p.getCodigo(), p.getId())) {
-                throw new IllegalArgumentException("Ya existe otro producto con el código " + p.getCodigo() + ".");
-            }
+            validarCodigoLibre(c, p.getCodigo(), p.getId());
             if (p.getTipoVenta() == TipoVenta.PIEZA && actual.getStock() % Cantidad.UNO != 0) {
                 throw new IllegalArgumentException(
                         "El stock actual tiene fracción; ajústalo a un número entero antes de venderlo por pieza.");

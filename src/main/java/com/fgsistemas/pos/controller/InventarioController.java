@@ -6,9 +6,11 @@ import com.fgsistemas.pos.service.ExportService.Cant;
 import com.fgsistemas.pos.service.ExportService.Monto;
 import com.fgsistemas.pos.service.InventarioService;
 import com.fgsistemas.pos.service.PermisoDenegadoException;
+import com.fgsistemas.pos.service.Validacion;
 import com.fgsistemas.pos.util.Acciones;
 import com.fgsistemas.pos.util.Alertas;
 import com.fgsistemas.pos.util.Cantidad;
+import com.fgsistemas.pos.util.CodigoBarras;
 import com.fgsistemas.pos.util.Dinero;
 import com.fgsistemas.pos.util.Sesion;
 import com.fgsistemas.pos.util.Teclado;
@@ -130,6 +132,10 @@ public class InventarioController {
         chkInactivos.selectedProperty().addListener((o, a, n) -> aplicarFiltro());
 
         txtBuscar.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
+            if (e.getCode() == KeyCode.ENTER && buscarCodigoEscaneado()) {
+                e.consume();
+                return;
+            }
             if ((e.getCode() == KeyCode.DOWN || e.getCode() == KeyCode.ENTER) && !filtrados.isEmpty()) {
                 e.consume();
                 tabla.requestFocus();
@@ -138,6 +144,56 @@ public class InventarioController {
                 }
             }
         });
+    }
+
+    /**
+     * Enter en el buscador con un código (lo que manda el lector de código de barras):
+     * si el producto existe lo elige en la tabla (aunque esté con o sin el 0 inicial); si no existe,
+     * ofrece darlo de alta con ese código.
+     *
+     * @return true si se encargó del Enter
+     */
+    private boolean buscarCodigoEscaneado() {
+        String codigo = CodigoBarras.limpiar(txtBuscar.getText());
+        if (codigo.isEmpty() || Validacion.codigoProducto(codigo) != null) {
+            return false; // texto con espacios u otros símbolos: es búsqueda por nombre
+        }
+        List<String> variantes = CodigoBarras.variantes(codigo);
+        Producto existente = null;
+        for (String v : variantes) {
+            existente = productos.stream().filter(p -> p.getCodigo().equalsIgnoreCase(v)).findFirst().orElse(null);
+            if (existente != null) {
+                break;
+            }
+        }
+        if (existente != null) {
+            if (!existente.isActivo() && editor) {
+                chkInactivos.setSelected(true);
+            }
+            if (!filtrados.contains(existente)) {
+                cmbCategoria.setValue(TODAS);
+                chkStockBajo.setSelected(false);
+                txtBuscar.setText(existente.getCodigo());
+            }
+            seleccionar(existente);
+            return true;
+        }
+        if (!filtrados.isEmpty() || !editor) {
+            return false; // hay coincidencias por nombre: comportamiento normal
+        }
+        if (Alertas.confirmar("No hay ningún producto con el código \"" + codigo + "\".\n\n"
+                + "¿Darlo de alta como producto nuevo con ese código?")) {
+            nuevo(codigo);
+        } else {
+            txtBuscar.selectAll();
+        }
+        return true;
+    }
+
+    private void seleccionar(Producto p) {
+        tabla.getSelectionModel().select(p);
+        tabla.scrollTo(p);
+        tabla.requestFocus();
     }
 
     private void aplicarFiltro() {
@@ -258,11 +314,20 @@ public class InventarioController {
         return p;
     }
 
+    /**
+     * Ins / Ctrl+N. Si en el buscador quedó un código que no existe (p. ej. recién escaneado), el producto
+     * nuevo ya trae ese código.
+     */
     private void nuevo() {
+        String codigo = CodigoBarras.limpiar(txtBuscar.getText());
+        nuevo(filtrados.isEmpty() && !codigo.isEmpty() && Validacion.codigoProducto(codigo) == null ? codigo : null);
+    }
+
+    private void nuevo(String codigoInicial) {
         if (!editor) {
             return;
         }
-        ProductoDialogos.formulario(null, null).ifPresent(p -> {
+        ProductoDialogos.formulario(null, codigoInicial).ifPresent(p -> {
             Alertas.toast("Producto \"" + p.getNombre() + "\" agregado");
             txtBuscar.clear();
             cargar(p.getId());

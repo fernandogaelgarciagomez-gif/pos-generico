@@ -5,8 +5,10 @@ Después lee `docs/00-plan-por-fases.md` y trabaja **una fase a la vez**.
 
 ## Qué es
 Sistema de punto de venta de escritorio, genérico (sirve para cualquier negocio pequeño:
-papelería, abarrotes, tienda de ropa, etc.). Una sola caja, sin hardware por ahora
-(sin lector de código de barras ni impresora; el código de barras se teclea).
+papelería, abarrotes, tienda de ropa, etc.). Una sola caja. Hardware opcional y genérico:
+impresora térmica de tickets ESC/POS (58/80 mm, vía impresora de Windows) y lector de código de
+barras USB en modo teclado (sin controlador). Todo funciona igual sin ellos (el código se teclea).
+Ver `docs/05-decisiones.md` #79–#82.
 
 ## Stack obligatorio
 - **Java 17** (no usar features de versiones más nuevas)

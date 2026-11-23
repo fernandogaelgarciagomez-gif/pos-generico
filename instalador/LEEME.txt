@@ -28,5 +28,14 @@ DESINSTALAR
 Configuración de Windows > Aplicaciones > "Punto de Venta" > Desinstalar.
 Los datos se quedan en la computadora.
 
+IMPRESORA DE TICKETS Y LECTOR DE CÓDIGO DE BARRAS (opcionales)
+- Impresora térmica de 58 u 80 mm (ESC/POS: Epson, Xprinter, 3nStar, Ec Line, genéricas):
+  1. Instálala en Windows con el controlador que trae (o como "Genérico / Solo texto").
+  2. En el Punto de Venta: Configuración > Ticket y lector > elige la impresora y el ancho del papel.
+  3. "Imprimir prueba" (Ctrl+P) y luego Guardar (Ctrl+S).
+  En Vender, Ctrl+P reimprime el último ticket. El cajón de dinero se abre solo si está conectado a la impresora.
+- Lector de código de barras USB: solo conéctalo, no lleva controlador. Prueba en
+  Configuración > Ticket y lector > "Probar lector" (F9).
+
 IMPORTANTE: una vez por semana haz un respaldo en una USB
 (Configuración > Respaldos > F6).

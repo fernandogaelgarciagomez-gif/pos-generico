@@ -2,9 +2,11 @@ package com.fgsistemas.pos.controller;
 
 import com.fgsistemas.pos.App;
 import com.fgsistemas.pos.config.AppConfig;
+import com.fgsistemas.pos.config.Hardware;
 import com.fgsistemas.pos.config.Migraciones;
 import com.fgsistemas.pos.dao.CategoriaDao.ConConteo;
 import com.fgsistemas.pos.model.Negocio;
+import com.fgsistemas.pos.model.Producto;
 import com.fgsistemas.pos.model.TipoVenta;
 import com.fgsistemas.pos.service.AuthService;
 import com.fgsistemas.pos.service.InventarioService;
@@ -12,9 +14,12 @@ import com.fgsistemas.pos.service.NegocioService;
 import com.fgsistemas.pos.service.PermisoDenegadoException;
 import com.fgsistemas.pos.service.RespaldoService;
 import com.fgsistemas.pos.service.RespaldoService.Respaldo;
+import com.fgsistemas.pos.service.TicketService;
 import com.fgsistemas.pos.util.Acciones;
 import com.fgsistemas.pos.util.Alertas;
 import com.fgsistemas.pos.util.Cantidad;
+import com.fgsistemas.pos.util.CodigoBarras;
+import com.fgsistemas.pos.util.Dinero;
 import com.fgsistemas.pos.util.Fechas;
 import com.fgsistemas.pos.util.Navegador;
 import com.fgsistemas.pos.util.Teclado;
@@ -24,7 +29,11 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
@@ -102,11 +111,27 @@ public class ConfiguracionController {
             "Respaldo automático (al abrir el sistema una vez al día y después de cada corte)");
     private final TextField txtDias = new TextField();
     private final TableView<Respaldo> tablaRespaldos = new TableView<>();
+    // Ticket y lector (de esta computadora: se guardan en hardware.properties, no en la BD)
+    private static final String SIN_IMPRESORA = "(Sin impresora: no imprimir tickets)";
+    private static final String PAPEL_58 = "58 mm (32 caracteres por renglón)";
+    private static final String PAPEL_80 = "80 mm (48 caracteres por renglón)";
+    private final ComboBox<String> cmbImpresora = new ComboBox<>();
+    private final ComboBox<String> cmbPapel = new ComboBox<>(FXCollections.observableArrayList(PAPEL_58, PAPEL_80));
+    private final ComboBox<Hardware.ModoTicket> cmbModo =
+            new ComboBox<>(FXCollections.observableArrayList(Hardware.ModoTicket.values()));
+    private final CheckBox chkCortar = new CheckBox("Cortar el papel al terminar (si la impresora tiene cortador)");
+    private final CheckBox chkCajon = new CheckBox(
+            "Abrir el cajón de dinero al cobrar en efectivo (cajón conectado a la impresora)");
+    private final CheckBox chkSinAcentos = new CheckBox(
+            "Imprimir sin acentos (si en el ticket salen símbolos raros en lugar de á, é, ñ…)");
+    private final CheckBox chkLector = new CheckBox(
+            "En Vender, mandar al campo de código lo que lea el lector aunque el cursor esté en otro lado");
 
     private Tab tabNegocio;
     private Tab tabInventario;
     private Tab tabVentas;
     private Tab tabRespaldos;
+    private Tab tabHardware;
     private Tab tabAcerca;
 
     private boolean cargando;
@@ -118,8 +143,9 @@ public class ConfiguracionController {
         tabInventario = new Tab("Inventario", envolver(armarInventario()));
         tabVentas = new Tab("Ventas", envolver(armarVentas()));
         tabRespaldos = new Tab("Respaldos", envolver(armarRespaldos()));
+        tabHardware = new Tab("Ticket y lector", envolver(armarHardware()));
         tabAcerca = new Tab("Acerca de", envolver(armarAcerca()));
-        pestanas.getTabs().addAll(tabNegocio, tabInventario, tabVentas, tabRespaldos, tabAcerca);
+        pestanas.getTabs().addAll(tabNegocio, tabInventario, tabVentas, tabRespaldos, tabHardware, tabAcerca);
         pestanas.getSelectionModel().selectedItemProperty().addListener((o, a, tab) -> enfocarPestana(tab));
 
         Acciones.agregar(barraAcciones, raiz, "Guardar", "Ctrl+S",
@@ -139,8 +165,13 @@ public class ConfiguracionController {
         cargarNegocio();
         cargarCategorias();
         cargarRespaldos();
+        cargarHardware();
         vigilarCambios(txtNombre, txtDireccion, txtTelefono, txtRfc, txtMensaje, txtStockMinimo, txtDescuento, txtDias);
         vigilarCambios(chkStockNegativo, chkTarjeta, chkTransferencia, chkFiado, chkRespaldoAuto);
+        vigilarCambios(chkCortar, chkCajon, chkSinAcentos, chkLector);
+        for (ComboBox<?> c : List.of(cmbImpresora, cmbPapel, cmbModo)) {
+            c.valueProperty().addListener((o, a, b) -> marcarSucio());
+        }
         Navegador.alCerrarAvisar(() -> sucio ? "Hay cambios sin guardar en Configuración." : null);
         Teclado.enfocar(txtNombre);
     }
@@ -275,6 +306,56 @@ public class ConfiguracionController {
                         + "cortes del mes, en Documentos\\Punto de Venta\\Exportaciones."));
     }
 
+    private Node armarHardware() {
+        for (ComboBox<?> c : List.of(cmbImpresora, cmbPapel, cmbModo)) {
+            c.setMaxWidth(Double.MAX_VALUE);
+            Teclado.comboConFlechas(c);
+        }
+        GridPane g = rejilla();
+        fila(g, 0, "Impresora de tickets", cmbImpresora);
+        fila(g, 1, "Ancho del papel", cmbPapel);
+        fila(g, 2, "Al cobrar", cmbModo);
+        g.add(chkCortar, 1, 3);
+        g.add(chkCajon, 1, 4);
+        g.add(chkSinAcentos, 1, 5);
+        Teclado.cadenaEnter(this::guardar, cmbImpresora, cmbPapel, cmbModo, chkCortar, chkCajon, chkSinAcentos);
+
+        Button actualizar = Acciones.boton("Buscar impresoras", "F5", this::cargarImpresoras);
+        Button prueba = Acciones.boton("Imprimir prueba", "Ctrl+P", this::imprimirPrueba);
+        Button vista = Acciones.boton("Vista previa", "F3", this::vistaPreviaTicket);
+        Button cajon = Acciones.boton("Abrir cajón", "F4", this::probarCajon);
+        atajo(tabHardware(), new KeyCodeCombination(KeyCode.F5), false, this::cargarImpresoras);
+        atajo(tabHardware(), new KeyCodeCombination(KeyCode.P, KeyCombination.SHORTCUT_DOWN), false,
+                this::imprimirPrueba);
+        atajo(tabHardware(), new KeyCodeCombination(KeyCode.F3), false, this::vistaPreviaTicket);
+        atajo(tabHardware(), new KeyCodeCombination(KeyCode.F4), false, this::probarCajon);
+
+        Button probarLector = Acciones.boton("Probar lector", "F9", this::probarLector);
+        atajo(tabHardware(), new KeyCodeCombination(KeyCode.F9), false, this::probarLector);
+
+        return new VBox(20,
+                subtitulo("Impresora de tickets (térmica)"),
+                pequeno("Sirve cualquier impresora térmica de 58 u 80 mm compatible con ESC/POS (Epson, Xprinter, "
+                        + "3nStar, Ec Line, genéricas…). Primero instálala en Windows con su controlador (o como "
+                        + "\"Genérico / Solo texto\") y luego elígela aquí. No elijas una impresora normal de hojas "
+                        + "ni \"Microsoft Print to PDF\"."),
+                g,
+                new FlowPane(8, 8, actualizar, prueba, vista, cajon),
+                pequeno("Prueba y vista previa usan lo que está en pantalla; Guardar (Ctrl+S) lo deja fijo. "
+                        + "En Vender, Ctrl+P reimprime el último ticket; en Ventas del turno, P reimprime la venta "
+                        + "elegida. Esta configuración es solo de esta computadora."),
+                subtitulo("Lector de código de barras"),
+                pequeno("Sirve cualquier lector USB o inalámbrico en modo teclado (el que viene así de fábrica): se "
+                        + "conecta y listo, no necesita controlador. Al leer un código \"escribe\" los números y da "
+                        + "Enter, igual que si se tecleara en el campo de código de Vender o Entrada de mercancía. "
+                        + "Si en el inventario el código está con o sin el 0 inicial, se encuentra igual."),
+                chkLector,
+                new HBox(8, probarLector),
+                pequeno("Si al probar salen letras o símbolos cambiados (por ejemplo ' en lugar de -), el lector y "
+                        + "Windows tienen distinto idioma de teclado: configura el lector en \"Latinoamérica\" o "
+                        + "\"Español\" con las hojas de códigos de su manual."));
+    }
+
     private Node armarAcerca() {
         VBox v = new VBox(10);
         Label app = new Label(AppConfig.NOMBRE_APP);
@@ -385,9 +466,31 @@ public class ConfiguracionController {
             Flujo.errorDatos(e);
             return;
         }
+        Hardware previo = Hardware.cargar();
+        Hardware hw = hardwareDeLaPantalla();
+        try {
+            hw.guardar();
+        } catch (IOException e) {
+            LOG.log(Level.SEVERE, "No se pudo guardar la configuración de la impresora", e);
+            pestanas.getSelectionModel().select(tabHardware);
+            Alertas.error("No se pudo guardar la configuración de la impresora y el lector.\n\n" + e.getMessage());
+            return;
+        }
         cargarNegocio();
+        cargarHardware();
         barraSuperiorController.refrescar();
         Alertas.toast("Configuración guardada");
+        // Error humano: elegir "Imprimir siempre / Preguntar" sin elegir la impresora (no saldría nada).
+        boolean tocoTicket = previo.getModo() != hw.getModo() || !previo.getImpresora().equals(hw.getImpresora());
+        if (tocoTicket && !hw.hayImpresora() && hw.getModo() != Hardware.ModoTicket.NUNCA) {
+            pestanas.getSelectionModel().select(tabHardware);
+            Alertas.advertencia("Elegiste \"" + hw.getModo().etiqueta() + "\", pero no hay impresora de tickets "
+                    + "elegida.\n\nElige tu impresora en la lista \"Impresora de tickets\" y vuelve a guardar.\n\n"
+                    + (hw.getModo() == Hardware.ModoTicket.PREGUNTAR
+                    ? "Mientras tanto, al cobrar se preguntará y el ticket se mostrará en pantalla."
+                    : "Mientras tanto no se imprimirán tickets."));
+            Teclado.enfocar(cmbImpresora);
+        }
     }
 
     private void salir() {
@@ -465,6 +568,146 @@ public class ConfiguracionController {
         }
         imgLogo.setImage(imagen);
         lblSinLogo.setVisible(imagen == null);
+    }
+
+    // ------------------------------------------------------------------ ticket y lector
+
+    private void cargarHardware() {
+        Hardware h = Hardware.cargar();
+        boolean antes = cargando;
+        cargando = true;
+        cargarImpresoras(h.getImpresora());
+        cmbPapel.setValue(h.getAnchoPapelMm() == 80 ? PAPEL_80 : PAPEL_58);
+        cmbModo.setValue(h.getModo());
+        chkCortar.setSelected(h.isCortarPapel());
+        chkCajon.setSelected(h.isAbrirCajon());
+        chkSinAcentos.setSelected(h.isSinAcentos());
+        chkLector.setSelected(h.isCapturarLector());
+        cargando = antes;
+    }
+
+    private void cargarImpresoras() {
+        String actual = cmbImpresora.getValue();
+        cargarImpresoras(SIN_IMPRESORA.equals(actual) ? "" : actual);
+        int total = cmbImpresora.getItems().size() - 1;
+        Alertas.toast(total == 1 ? "1 impresora encontrada en Windows" : total + " impresoras encontradas en Windows");
+    }
+
+    /** Llena la lista con las impresoras de Windows y deja elegida {@code elegir} (aunque ya no esté conectada). */
+    private void cargarImpresoras(String elegir) {
+        List<String> lista = new java.util.ArrayList<>();
+        lista.add(SIN_IMPRESORA);
+        try {
+            lista.addAll(TicketService.impresorasInstaladas());
+        } catch (RuntimeException e) {
+            LOG.log(Level.WARNING, "No se pudo leer la lista de impresoras de Windows", e);
+        }
+        if (elegir != null && !elegir.isBlank() && lista.stream().noneMatch(elegir::equalsIgnoreCase)) {
+            lista.add(elegir); // configurada pero desconectada: se conserva para no perderla
+        }
+        boolean antes = cargando;
+        cargando = true;
+        cmbImpresora.setItems(FXCollections.observableArrayList(lista));
+        cmbImpresora.setValue(elegir == null || elegir.isBlank() ? SIN_IMPRESORA
+                : lista.stream().filter(elegir::equalsIgnoreCase).findFirst().orElse(SIN_IMPRESORA));
+        cargando = antes;
+    }
+
+    private Hardware hardwareDeLaPantalla() {
+        Hardware h = new Hardware();
+        String imp = cmbImpresora.getValue();
+        h.setImpresora(imp == null || SIN_IMPRESORA.equals(imp) ? "" : imp);
+        h.setAnchoPapelMm(PAPEL_80.equals(cmbPapel.getValue()) ? 80 : 58);
+        h.setModo(cmbModo.getValue());
+        h.setCortarPapel(chkCortar.isSelected());
+        h.setAbrirCajon(chkCajon.isSelected());
+        h.setSinAcentos(chkSinAcentos.isSelected());
+        h.setCapturarLector(chkLector.isSelected());
+        return h;
+    }
+
+    private Hardware hardwareConImpresora() {
+        Hardware h = hardwareDeLaPantalla();
+        if (!h.hayImpresora()) {
+            Alertas.advertencia("Primero elige la impresora de tickets en la lista.");
+            Teclado.enfocar(cmbImpresora);
+            return null;
+        }
+        return h;
+    }
+
+    private void imprimirPrueba() {
+        Hardware h = hardwareConImpresora();
+        if (h == null) {
+            return;
+        }
+        try {
+            byte[] datos = new TicketService().ticketPrueba(h).bytes();
+            Impresion.avisarSiFalla(TicketService.enviar(h.getImpresora(), datos, "Ticket de prueba"),
+                    "No se pudo imprimir el ticket de prueba");
+            Alertas.toast("Ticket de prueba enviado a " + h.getImpresora());
+        } catch (SQLException e) {
+            Flujo.errorDatos(e);
+        }
+    }
+
+    private void vistaPreviaTicket() {
+        try {
+            Impresion.vistaPrevia("Vista previa del ticket", new TicketService().ticketPrueba(hardwareDeLaPantalla()));
+        } catch (SQLException e) {
+            Flujo.errorDatos(e);
+        }
+    }
+
+    private void probarCajon() {
+        Hardware h = hardwareConImpresora();
+        if (h == null) {
+            return;
+        }
+        Impresion.avisarSiFalla(TicketService.abrirCajon(h), "No se pudo abrir el cajón");
+        Alertas.toast("Orden de abrir cajón enviada");
+    }
+
+    /** Ventana para escanear códigos y ver qué llega: tipo, si es válido y a qué producto corresponde. */
+    private void probarLector() {
+        TextField txt = new TextField();
+        txt.setPromptText("Escanea un código aquí");
+        Label resultado = new Label("Apunta el lector a un código de barras y dispara. Puedes probar varios.");
+        resultado.setWrapText(true);
+        resultado.setMaxWidth(560);
+        resultado.setMinHeight(130);
+        txt.setOnAction(e -> {
+            String crudo = txt.getText();
+            String codigo = CodigoBarras.limpiar(crudo);
+            if (codigo.isEmpty()) {
+                return;
+            }
+            StringBuilder sb = new StringBuilder();
+            sb.append("Leído: ").append(codigo).append("   (").append(codigo.length()).append(" caracteres)\n");
+            sb.append("Tipo: ").append(CodigoBarras.tipo(codigo)).append('\n');
+            if (!crudo.equals(codigo)) {
+                sb.append("El lector mandó espacios o caracteres de control extra; se quitan solos.\n");
+            }
+            try {
+                Optional<Producto> p = inventario.buscarActivoPorCodigo(codigo);
+                sb.append(p.map(x -> "Producto: " + x.getNombre() + " · " + Dinero.formatear(x.getPrecioVenta())
+                                + (x.getCodigo().equals(codigo) ? "" : "  (registrado como " + x.getCodigo() + ")"))
+                        .orElse("Ningún producto activo tiene este código (dalo de alta en Inventario)."));
+            } catch (SQLException ex) {
+                sb.append("No se pudo buscar el producto: ").append(ex.getMessage());
+            } catch (PermisoDenegadoException ex) {
+                sb.append(ex.getMessage());
+            }
+            resultado.setText(sb.toString());
+            txt.clear();
+        });
+        Dialog<ButtonType> d = new Dialog<>();
+        d.setTitle("Probar lector de código de barras");
+        d.getDialogPane().getButtonTypes().add(new ButtonType("Cerrar (Esc)", ButtonBar.ButtonData.CANCEL_CLOSE));
+        d.getDialogPane().setContent(new VBox(12, subtitulo("Probar lector de código de barras"), txt, resultado));
+        Alertas.estilizar(d);
+        d.setOnShown(e -> Teclado.enfocar(txt));
+        d.showAndWait();
     }
 
     // ------------------------------------------------------------------ categorías
@@ -704,6 +947,10 @@ public class ConfiguracionController {
         return () -> tabRespaldos;
     }
 
+    private java.util.function.Supplier<Tab> tabHardware() {
+        return () -> tabHardware;
+    }
+
     private void cambiarPestana(int delta) {
         int total = pestanas.getTabs().size();
         int i = pestanas.getSelectionModel().getSelectedIndex();
@@ -720,6 +967,8 @@ public class ConfiguracionController {
             destino = chkTarjeta;
         } else if (tab == tabRespaldos) {
             destino = tablaRespaldos.getItems().isEmpty() ? chkRespaldoAuto : tablaRespaldos;
+        } else if (tab == tabHardware) {
+            destino = cmbImpresora;
         } else {
             destino = raiz;
         }

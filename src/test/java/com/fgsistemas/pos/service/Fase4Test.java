@@ -108,6 +108,17 @@ class Fase4Test {
     }
 
     @Test
+    void codigoDeBarrasConYSinCeroInicialEsElMismoProducto() throws Exception {
+        Producto upc = inventario.crear(producto("036000291452", "Pañuelos", TipoVenta.PIEZA, "pza",
+                2500, 1500, 0, 0), null);
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> inventario.crear(
+                producto("0036000291452", "Pañuelos otra vez", TipoVenta.PIEZA, "pza", 2500, 1500, 0, 0), null));
+        assertTrue(e.getMessage().contains("0 inicial"), e.getMessage());
+        // El lector lo lee con 13 dígitos y aun así se encuentra.
+        assertEquals(upc.getId(), inventario.buscarActivoPorCodigo("0036000291452").orElseThrow().getId());
+    }
+
+    @Test
     void codigoUnicoYValidaciones() throws Exception {
         refresco();
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class, this::refresco);
