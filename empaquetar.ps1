@@ -17,7 +17,12 @@
 
 param(
     [switch]$SinPruebas,
-    [string]$Jdk32 = ''
+    [string]$Jdk32 = '',
+    # Actualización automática (decisión 85): novedades que verá el admin, y si esta versión cambia librerías o
+    # el Java incluido (entonces el programa pide usar el instalador completo en vez de actualizarse solo).
+    [string]$Notas = '',
+    [switch]$RequiereInstalador,
+    [string]$Repo = 'fernandogaelgarciagomez-gif/pos-generico'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -44,6 +49,9 @@ if ($Jdk32 -and -not (Test-Path (Join-Path $Jdk32 'bin\jlink.exe'))) {
 [xml]$pom = Get-Content pom.xml
 $version = $pom.project.version
 $nombreJar = "$($pom.project.artifactId)-$version.jar"
+# Nombre FIJO del programa en la instalación: no cambia entre versiones, así la actualización automática solo
+# reemplaza este archivo y los accesos directos siguen sirviendo (decisión 85).
+$jarFijo = 'pos-generico.jar'
 $javafx32 = '17.0.8'   # última versión de JavaFX 17 publicada para Windows de 32 bits
 $opcionesJava = @('-Dfile.encoding=UTF-8', '-Xmx768m')
 
@@ -91,16 +99,19 @@ Write-Host '2/4 Versión de 64 bits...' -ForegroundColor Cyan
 $in64 = 'target\paquete64'
 if (Test-Path $in64) { Remove-Item $in64 -Recurse -Force }
 New-Item -ItemType Directory -Force "$in64\lib" | Out-Null
-Copy-Item "target\$nombreJar" $in64
+Copy-Item "target\$nombreJar" "$in64\$jarFijo"
 Copy-Item 'target\lib\*.jar' "$in64\lib"
 Get-ChildItem "$in64\lib\javafx-*-win.jar" | ForEach-Object { Sacar-Nativas $_.FullName "$in64\native" }
 Copiar-Sqlite $sqliteJar 'x86_64' "$in64\native"
 
 $jp = @(
     '--type', 'app-image', '--name', 'Punto de Venta', '--app-version', $version, '--vendor', 'FG Sistemas',
-    '--description', 'Punto de venta FG Sistemas', '--input', $in64, '--main-jar', $nombreJar,
+    '--description', 'Punto de venta FG Sistemas', '--input', $in64, '--main-jar', $jarFijo,
     '--main-class', 'com.fgsistemas.pos.Lanzador', '--dest', 'target\app64',
-    '--icon', 'src\main\resources\img\icono.ico'
+    '--icon', 'src\main\resources\img\icono.ico',
+    # Igual que el predeterminado de jpackage pero SIN --strip-native-commands: el ayudante de la actualización
+    # automática necesita runtime\bin\javaw.exe (decisión 85).
+    '--jlink-options', '--strip-debug --no-man-pages --no-header-files'
 )
 foreach ($o in $opcionesJava + @('-Djava.library.path=$APPDIR\native', '-Dorg.sqlite.lib.path=$APPDIR\native',
         '-Dorg.sqlite.lib.name=sqlitejdbc.dll')) { $jp += @('--java-options', $o) }
@@ -121,7 +132,7 @@ if ($Jdk32) {
     }
     $app32 = Join-Path $entrega 'Punto de Venta (32 bits)'
     New-Item -ItemType Directory -Force "$app32\app\lib" | Out-Null
-    Copy-Item "target\$nombreJar" "$app32\app"
+    Copy-Item "target\$nombreJar" "$app32\app\$jarFijo"
     Get-ChildItem 'target\lib\*.jar' | Where-Object { $_.Name -notlike 'javafx-*' } | Copy-Item -Destination "$app32\app\lib"
     Copy-Item "$fx\javafx-*-$javafx32-win-x86.jar" "$app32\app\lib"
     Get-ChildItem "$app32\app\lib\javafx-*-win-x86.jar" | ForEach-Object { Sacar-Nativas $_.FullName "$app32\app\native" }
@@ -137,7 +148,7 @@ if ($Jdk32) {
 
     # Cómo se arranca (lo usan el instalador para el acceso directo y "Punto de Venta.cmd").
     $lanzador = (($opcionesJava + @('-Djava.library.path=app\native', '-Dorg.sqlite.lib.path=app\native',
-            '-Dorg.sqlite.lib.name=sqlitejdbc.dll', '-cp', "`"app\$nombreJar;app\lib\*`"",
+            '-Dorg.sqlite.lib.name=sqlitejdbc.dll', '-cp', "`"app\$jarFijo;app\lib\*`"",
             'com.fgsistemas.pos.Lanzador')) -join ' ')
     Set-Content -Path "$app32\lanzador.txt" -Value $lanzador -Encoding ASCII
     Set-Content -Path "$app32\Punto de Venta.cmd" -Encoding ASCII -Value @(
@@ -152,6 +163,25 @@ Write-Host '4/4 Armando el paquete de entrega...' -ForegroundColor Cyan
 Copy-Item 'instalador\Instalar.bat', 'instalador\instalar.ps1', 'instalador\desinstalar.ps1', 'instalador\LEEME.txt' $entrega
 Set-Content -Path "$entrega\version.txt" -Value $version -Encoding ASCII
 Compress-Archive -Path $entrega -DestinationPath "$destino\Punto de Venta $version - instalador.zip" -Force
+
+# Archivos de la actualización automática (los sube publicar.ps1 a GitHub Releases).
+$act = Join-Path $destino 'actualizacion'
+if (Test-Path $act) { Remove-Item $act -Recurse -Force }
+New-Item -ItemType Directory -Force $act | Out-Null
+Copy-Item "target\$nombreJar" "$act\$jarFijo"
+$hash = (Get-FileHash "$act\$jarFijo" -Algorithm SHA256).Hash.ToLower()
+$bytes = (Get-Item "$act\$jarFijo").Length
+$notasProp = $Notas.Replace('\', '\\').Replace("`r", '').Replace("`n", '\n')
+$manifiesto = @(
+    "version=$version",
+    "jar=https://github.com/$Repo/releases/download/v$version/$jarFijo",
+    "sha256=$hash",
+    "bytes=$bytes",
+    "requiereInstalador=$(if ($RequiereInstalador) { 'true' } else { 'false' })",
+    "pagina=https://github.com/$Repo/releases/tag/v$version",
+    "notas=$notasProp"
+)
+[IO.File]::WriteAllLines("$act\actualizacion.properties", [string[]]$manifiesto, (New-Object Text.UTF8Encoding $false))
 
 Write-Host ''
 Write-Host "Listo. Revisa $destino" -ForegroundColor Green

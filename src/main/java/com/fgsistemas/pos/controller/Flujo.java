@@ -1,6 +1,7 @@
 package com.fgsistemas.pos.controller;
 
 import com.fgsistemas.pos.model.Turno;
+import com.fgsistemas.pos.service.ActualizacionService;
 import com.fgsistemas.pos.service.AuthService;
 import com.fgsistemas.pos.service.ConfiguracionInicialService;
 import com.fgsistemas.pos.service.InventarioService;
@@ -10,6 +11,7 @@ import com.fgsistemas.pos.util.Alertas;
 import com.fgsistemas.pos.util.Fechas;
 import com.fgsistemas.pos.util.Navegador;
 import com.fgsistemas.pos.util.Sesion;
+import javafx.application.Platform;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -103,7 +105,30 @@ public final class Flujo {
             } catch (SQLException e) {
                 LOG.log(Level.WARNING, "No se pudo contar el stock bajo", e);
             }
+            revisarActualizacionDelDia();
         }
+    }
+
+    /**
+     * Una vez al día, en segundo plano, revisa si hay versión nueva y lo avisa con un mensaje breve (decisión 85).
+     * Sin internet no pasa nada: no se insiste ni se muestra error.
+     */
+    private static void revisarActualizacionDelDia() {
+        ActualizacionService svc = new ActualizacionService();
+        if (svc.yaSeRevisoHoy() || ActualizacionService.instalacionActual().isEmpty()) {
+            return;
+        }
+        Thread t = new Thread(() -> {
+            try {
+                svc.buscar().ifPresent(d -> Platform.runLater(() -> Alertas.toast(
+                        "Hay una versión nueva del programa (" + d.version()
+                                + "). Instálala en Configuración → Actualizaciones")));
+            } catch (Exception e) {
+                LOG.log(Level.INFO, "No se pudo revisar si hay actualizaciones: " + e.getMessage());
+            }
+        }, "revisar-actualizacion");
+        t.setDaemon(true);
+        t.start();
     }
 
     public static void cerrarSesion() {

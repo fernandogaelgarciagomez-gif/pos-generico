@@ -8,6 +8,7 @@ import com.fgsistemas.pos.dao.CategoriaDao.ConConteo;
 import com.fgsistemas.pos.model.Negocio;
 import com.fgsistemas.pos.model.Producto;
 import com.fgsistemas.pos.model.TipoVenta;
+import com.fgsistemas.pos.service.ActualizacionService;
 import com.fgsistemas.pos.service.AuthService;
 import com.fgsistemas.pos.service.InventarioService;
 import com.fgsistemas.pos.service.NegocioService;
@@ -132,7 +133,15 @@ public class ConfiguracionController {
     private Tab tabVentas;
     private Tab tabRespaldos;
     private Tab tabHardware;
+    private Tab tabActualizar;
     private Tab tabAcerca;
+    // Actualizaciones (decisión 85)
+    private final ActualizacionService actualizaciones = new ActualizacionService();
+    private final Label lblActualizacion = new Label("Presiona \"Buscar actualizaciones\" (F5).");
+    private final Label lblNotasVersion = pequeno("");
+    private Button btnInstalarVersion;
+    private ActualizacionService.Disponible disponible;
+    private boolean actualizando;
 
     private boolean cargando;
     private boolean sucio;
@@ -144,8 +153,10 @@ public class ConfiguracionController {
         tabVentas = new Tab("Ventas", envolver(armarVentas()));
         tabRespaldos = new Tab("Respaldos", envolver(armarRespaldos()));
         tabHardware = new Tab("Ticket y lector", envolver(armarHardware()));
+        tabActualizar = new Tab("Actualizaciones", envolver(armarActualizaciones()));
         tabAcerca = new Tab("Acerca de", envolver(armarAcerca()));
-        pestanas.getTabs().addAll(tabNegocio, tabInventario, tabVentas, tabRespaldos, tabHardware, tabAcerca);
+        pestanas.getTabs().addAll(tabNegocio, tabInventario, tabVentas, tabRespaldos, tabHardware, tabActualizar,
+                tabAcerca);
         pestanas.getSelectionModel().selectedItemProperty().addListener((o, a, tab) -> enfocarPestana(tab));
 
         Acciones.agregar(barraAcciones, raiz, "Guardar", "Ctrl+S",
@@ -354,6 +365,126 @@ public class ConfiguracionController {
                 pequeno("Si al probar salen letras o símbolos cambiados (por ejemplo ' en lugar de -), el lector y "
                         + "Windows tienen distinto idioma de teclado: configura el lector en \"Latinoamérica\" o "
                         + "\"Español\" con las hojas de códigos de su manual."));
+    }
+
+    private Node armarActualizaciones() {
+        Button buscar = Acciones.boton("Buscar actualizaciones", "F5", this::buscarActualizacion);
+        btnInstalarVersion = Acciones.boton("Descargar e instalar", "F6", this::instalarActualizacion);
+        btnInstalarVersion.setDisable(true);
+        atajo(tabActualizar(), new KeyCodeCombination(KeyCode.F5), false, this::buscarActualizacion);
+        atajo(tabActualizar(), new KeyCodeCombination(KeyCode.F6), false, this::instalarActualizacion);
+        lblActualizacion.setWrapText(true);
+        lblActualizacion.setMaxWidth(900);
+        VBox v = new VBox(10, subtitulo("Versión instalada: " + AppConfig.version()),
+                pequeno("El programa se actualiza solo desde internet, sin reinstalar ni llevar USB. Al instalar una "
+                        + "versión nueva se hace un respaldo, el programa se cierra y se vuelve a abrir solo en unos "
+                        + "segundos. Las ventas, el inventario y la configuración no se tocan. Una vez al día, al "
+                        + "entrar al menú, el sistema revisa si hay versión nueva y te avisa."),
+                new HBox(8, buscar, btnInstalarVersion), lblActualizacion, lblNotasVersion);
+        if (ActualizacionService.instalacionActual().isEmpty()) {
+            v.getChildren().add(pequeno("Este programa no se está ejecutando desde la instalación (por ejemplo, desde "
+                    + "el proyecto): se puede buscar, pero no instalar."));
+        }
+        return v;
+    }
+
+    private void buscarActualizacion() {
+        if (actualizando) {
+            return;
+        }
+        actualizando = true;
+        disponible = null;
+        btnInstalarVersion.setDisable(true);
+        lblNotasVersion.setText("");
+        lblActualizacion.setText("Buscando…");
+        Thread t = new Thread(() -> {
+            String mensaje;
+            Optional<ActualizacionService.Disponible> d = Optional.empty();
+            try {
+                d = actualizaciones.buscar();
+                mensaje = d.map(x -> "Hay una versión nueva: " + x.version()
+                                + (x.bytes() > 0 ? String.format(" (%.1f MB)", x.bytes() / 1048576.0) : "")
+                                + ". Presiona \"Descargar e instalar\" (F6).")
+                        .orElse("Ya tienes la versión más reciente (" + AppConfig.version() + ").");
+            } catch (IOException e) {
+                LOG.log(Level.INFO, "No se pudo buscar actualización", e);
+                mensaje = "No se pudo revisar: " + e.getMessage();
+            }
+            Optional<ActualizacionService.Disponible> fin = d;
+            String texto = mensaje;
+            javafx.application.Platform.runLater(() -> {
+                actualizando = false;
+                disponible = fin.orElse(null);
+                lblActualizacion.setText(texto);
+                if (disponible != null) {
+                    lblNotasVersion.setText(disponible.notas().isEmpty() ? "" : "Novedades: " + disponible.notas());
+                    btnInstalarVersion.setDisable(false);
+                }
+            });
+        }, "buscar-actualizacion");
+        t.setDaemon(true);
+        t.start();
+    }
+
+    private void instalarActualizacion() {
+        ActualizacionService.Disponible d = disponible;
+        if (d == null || actualizando) {
+            return;
+        }
+        if (d.requiereInstalador()) {
+            Alertas.info("Actualización", "La versión " + d.version() + " cambia partes internas del programa y "
+                    + "necesita el instalador completo.\n\nDescárgalo de:\n"
+                    + (d.paginaDescarga().isEmpty() ? AppConfig.URL_VERSIONES : d.paginaDescarga())
+                    + "\n\nCierra el programa y ejecuta Instalar.bat; tus datos se conservan.");
+            return;
+        }
+        Optional<ActualizacionService.Instalacion> inst = ActualizacionService.instalacionActual();
+        if (inst.isEmpty()) {
+            Alertas.advertencia("Este programa no se está ejecutando desde la instalación: no se puede actualizar "
+                    + "solo. Usa el instalador.");
+            return;
+        }
+        if (sucio) {
+            Alertas.advertencia("Primero guarda los cambios de Configuración (Ctrl+S).");
+            return;
+        }
+        if (!Alertas.confirmar("Se va a instalar la versión " + d.version() + ":\n\n"
+                + "1. Se hace un respaldo de tus datos.\n"
+                + "2. Se baja la versión nueva de internet.\n"
+                + "3. El programa se cierra y se abre solo con la versión nueva (unos segundos).\n\n"
+                + "Las ventas, el inventario y la configuración no se tocan. ¿Continuar?")) {
+            return;
+        }
+        actualizando = true;
+        btnInstalarVersion.setDisable(true);
+        lblActualizacion.setText("Haciendo respaldo…");
+        Thread t = new Thread(() -> {
+            try {
+                respaldos.respaldarAhora();
+                javafx.application.Platform.runLater(() -> lblActualizacion.setText("Bajando la versión nueva…"));
+                Path jar = actualizaciones.descargar(d, bytes -> javafx.application.Platform.runLater(() ->
+                        lblActualizacion.setText(String.format("Bajando la versión nueva… %.1f MB", bytes / 1048576.0))));
+                actualizaciones.lanzarAyudante(inst.get(), jar, d.version());
+                javafx.application.Platform.runLater(() -> {
+                    lblActualizacion.setText("Cerrando para terminar la actualización…");
+                    LOG.info("Cerrando para instalar la versión " + d.version());
+                    javafx.application.Platform.exit();
+                    System.exit(0);
+                });
+            } catch (Exception e) {
+                LOG.log(Level.WARNING, "No se pudo instalar la actualización", e);
+                javafx.application.Platform.runLater(() -> {
+                    actualizando = false;
+                    btnInstalarVersion.setDisable(false);
+                    lblActualizacion.setText("No se pudo actualizar; sigues con la versión " + AppConfig.version()
+                            + ".");
+                    Alertas.error("No se pudo actualizar.\n\n" + (e instanceof IOException ? e.getMessage()
+                            : com.fgsistemas.pos.util.Registro.mensajeInesperado(e)));
+                });
+            }
+        }, "instalar-actualizacion");
+        t.setDaemon(true);
+        t.start();
     }
 
     private Node armarAcerca() {
@@ -949,6 +1080,10 @@ public class ConfiguracionController {
 
     private java.util.function.Supplier<Tab> tabHardware() {
         return () -> tabHardware;
+    }
+
+    private java.util.function.Supplier<Tab> tabActualizar() {
+        return () -> tabActualizar;
     }
 
     private void cambiarPestana(int delta) {

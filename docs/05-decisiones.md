@@ -225,3 +225,18 @@ Este archivo **manda** sobre el resto de los docs si hay contradicción.
     "Nombre") y, al guardarlo, el producto **se agrega a la venta en curso** (respeta `3*código`). Solo para quien
     tiene `EDITAR_INVENTARIO` (admin); el cajero ve "pide al administrador que lo dé de alta" y puede buscar por
     nombre. Una palabra sin números ("coca") sigue yendo directo al buscador.
+85. **Actualización automática sin reinstalar** (Configuración → Actualizaciones, F5/F6; solo admin). Cada versión se
+    publica en **GitHub Releases** del repositorio (público, gratis) con `publicar.ps1`: `pos-generico.jar`,
+    `actualizacion.properties` (versión, liga del jar, huella SHA-256, tamaño, notas, `requiereInstalador`) y el
+    instalador completo. El programa lee `releases/latest/download/actualizacion.properties`, baja el jar por https
+    (con los certificados de Windows, para que funcione con antivirus que revisan https), revisa la huella, hace un
+    respaldo y lanza el ayudante `com.fgsistemas.pos.Actualizador` **desde el jar nuevo**: espera a que el programa se
+    cierre (Windows no deja reemplazar un jar en uso), guarda el actual como `pos-generico.anterior.jar`, pone el
+    nuevo, escribe `version.txt` y vuelve a abrir el programa, que dice cómo salió
+    (`<datos>\actualizacion\resultado.properties`; detalle en `logs\actualizacion.log`). Las migraciones de BD
+    corren solas al abrir.
+    **Nombre fijo `app\pos-generico.jar`** desde la 0.3.0 (los accesos directos de 32 bits llevan la ruta del jar);
+    las instalaciones anteriores necesitan una vez el instalador. Solo se actualiza el jar: si cambian librerías o el
+    Java incluido, se empaqueta con `-RequiereInstalador` y el programa manda a bajar el instalador. Aviso al admin al
+    entrar al menú, una vez al día y en segundo plano (sin internet no molesta).
+86. **Consulta desde el celular**: acordada y pendiente de planear (`docs/07-consulta-movil-pendiente.md`).

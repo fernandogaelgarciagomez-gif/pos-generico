@@ -15,9 +15,13 @@ SI ALGO SALE MAL
 
 La primera vez pide crear el usuario administrador y los datos del negocio.
 
-ACTUALIZAR A UNA VERSIÓN NUEVA
-Cierra el Punto de Venta y ejecuta Instalar.bat de la versión nueva.
-Las ventas, el inventario y los respaldos se conservan.
+ACTUALIZAR A UNA VERSIÓN NUEVA (sin reinstalar)
+El programa se actualiza solo desde internet:
+  Configuración > Actualizaciones > "Buscar actualizaciones" (F5) > "Descargar e instalar" (F6).
+Hace un respaldo, se cierra y se vuelve a abrir solo con la versión nueva. Una vez al día, al entrar
+al menú, el administrador ve un aviso si hay versión nueva.
+Si una versión pide el instalador completo (o no hay internet): cierra el Punto de Venta y ejecuta
+Instalar.bat de la versión nueva. En los dos casos las ventas, el inventario y los respaldos se conservan.
 
 DÓNDE ESTÁ CADA COSA
 - Programa:  %LOCALAPPDATA%\Programs\Punto de Venta

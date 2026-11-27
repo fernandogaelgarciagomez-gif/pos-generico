@@ -29,6 +29,12 @@ y ponen el foco en su primer campo.
 ## Pestaña Respaldos
 - Ver `23-respaldos.md`.
 
+## Pestaña Actualizaciones (decisión 85)
+- Versión instalada, **Buscar actualizaciones (F5)** y **Descargar e instalar (F6)** con las novedades de la versión.
+- Instalar: respaldo → descarga con verificación de huella SHA-256 → el programa se cierra y se abre solo con la
+  versión nueva; al abrir dice si salió bien. Si la versión necesita el instalador completo, lo indica con la liga.
+- Al entrar al menú, el admin ve un aviso (una vez al día) si hay versión nueva. Sin internet no se muestra nada.
+
 ## Pestaña Acerca de
 - Nombre de la app, versión, "Desarrollado por FG Sistemas", contacto (`AppConfig.CONTACTO_*`; si está
   vacío no se muestra), carpeta de datos, versión de la BD y de Java.

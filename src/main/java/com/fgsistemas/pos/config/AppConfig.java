@@ -22,6 +22,16 @@ public final class AppConfig {
     public static final String CONTACTO_TELEFONO = "";
     public static final String CONTACTO_CORREO = "";
 
+    /**
+     * Manifiesto de la última versión publicada (GitHub Releases del repositorio público). Decisión 85.
+     * Se puede cambiar con {@code -Dpos.actualizaciones=...}.
+     */
+    public static final String URL_ACTUALIZACIONES =
+            "https://github.com/fernandogaelgarciagomez-gif/pos-generico/releases/latest/download/actualizacion.properties";
+
+    /** Página donde se descarga el instalador completo (cuando una versión lo necesita). */
+    public static final String URL_VERSIONES = "https://github.com/fernandogaelgarciagomez-gif/pos-generico/releases";
+
     /** Propiedad de sistema para cambiar la carpeta de datos (pruebas, instalaciones especiales). */
     public static final String PROP_CARPETA_DATOS = "pos.datos";
 
