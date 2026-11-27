@@ -28,7 +28,8 @@ public final class Permisos {
                 Permiso.VER_RESUMEN_DIA,
                 Permiso.HACER_CORTE,
                 Permiso.FIADOS_VENDER,
-                Permiso.FIADOS_ABONAR)));
+                Permiso.FIADOS_ABONAR,
+                Permiso.SALIDA_SIN_COBRO)));
     }
 
     private Permisos() {

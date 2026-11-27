@@ -19,5 +19,7 @@ public enum Permiso {
     CONFIGURACION,
     RESPALDOS,
     /** Hacer el corte de un turno abierto por otro usuario (sin autorización: solo admin). */
-    CORTE_TURNO_AJENO
+    CORTE_TURNO_AJENO,
+    /** Sacar productos del inventario sin cobrarlos (uso interno, consumo del personal, cortesías). */
+    SALIDA_SIN_COBRO
 }

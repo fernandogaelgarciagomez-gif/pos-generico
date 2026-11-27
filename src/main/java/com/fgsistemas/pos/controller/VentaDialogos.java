@@ -13,6 +13,7 @@ import com.fgsistemas.pos.service.Autorizacion;
 import com.fgsistemas.pos.service.CajaService;
 import com.fgsistemas.pos.service.ClienteService;
 import com.fgsistemas.pos.service.PermisoDenegadoException;
+import com.fgsistemas.pos.service.SalidaService;
 import com.fgsistemas.pos.service.VentaService;
 import com.fgsistemas.pos.service.VentaService.Pago;
 import com.fgsistemas.pos.util.Acciones;
@@ -745,6 +746,55 @@ final class VentaDialogos {
         if (ok) {
             Alertas.toast("Movimiento de caja registrado");
         }
+    }
+
+    // ================================================================== salida sin cobro
+
+    /**
+     * F9: los productos del carrito salen del inventario sin cobrarse (no entra dinero a la caja).
+     *
+     * @return true si se registró la salida
+     */
+    static boolean salidaSinCobro(Carrito carrito) {
+        StringBuilder lista = new StringBuilder();
+        long valor = 0;
+        for (Carrito.Renglon r : carrito.getRenglones()) {
+            lista.append("• ").append(r.cantidadTexto()).append("  ").append(r.getProducto().getNombre()).append('\n');
+            valor += Cantidad.importe(r.getProducto().getPrecioVenta(), r.getCantidad());
+        }
+        Label lblProductos = new Label(lista.toString().trim());
+        lblProductos.setWrapText(true);
+        Label lblValor = new Label(Dinero.formatear(valor) + " (no se cobra)");
+        lblValor.getStyleClass().add("subtitulo");
+        ComboBox<String> cmbMotivo = new ComboBox<>(FXCollections.observableArrayList(SalidaService.MOTIVOS));
+        cmbMotivo.setEditable(true);
+        cmbMotivo.setPromptText("Obligatorio. Ej. Uso interno");
+        cmbMotivo.setMaxWidth(Double.MAX_VALUE);
+        SalidaService servicio = new SalidaService();
+        SalidaService.SalidaRegistrada[] hecha = new SalidaService.SalidaRegistrada[1];
+
+        boolean ok = new Formulario("Sacar sin cobrar", "Sacar del inventario (Enter)")
+                .campo("Productos", lblProductos)
+                .campo("Valor a precio de venta", lblValor)
+                .campo("Motivo", cmbMotivo)
+                .nota("El stock baja y NO entra dinero a la caja. Queda registrado quién lo sacó, cuándo y por qué "
+                        + "(el administrador lo ve en Inventario → Salidas sin cobro). Motivo: elige con Alt+↓ o escríbelo.")
+                .mostrar(() -> {
+                    try {
+                        hecha[0] = servicio.registrar(carrito, cmbMotivo.getEditor().getText());
+                        return null;
+                    } catch (IllegalArgumentException | IllegalStateException | PermisoDenegadoException e) {
+                        return e.getMessage();
+                    } catch (SQLException e) {
+                        Flujo.errorDatos(e);
+                        return "No se pudo guardar.";
+                    }
+                });
+        if (ok && hecha[0] != null) {
+            Alertas.toast("Salida #" + hecha[0].id() + " registrada · " + hecha[0].productos()
+                    + (hecha[0].productos() == 1 ? " producto" : " productos") + " sin cobrar");
+        }
+        return ok && hecha[0] != null;
     }
 
     // ================================================================== autorización

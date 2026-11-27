@@ -212,3 +212,16 @@ Este archivo **manda** sobre el resto de los docs si hay contradicción.
 82. **Probar lector** (Configuración > Ticket y lector, F9): muestra lo leído, el tipo (EAN-13, UPC-A, EAN-8, GTIN-14 o
     interno, con dígito verificador) y a qué producto corresponde. Si salen símbolos cambiados es el idioma de teclado
     del lector (configurarlo en Latinoamérica/Español con su manual).
+83. **Sacar sin cobrar** (Vender, F9; migración V3): el cajero/recepcionista agrega los productos al carrito como en
+    una venta y, en vez de cobrar, los saca del inventario con un **motivo obligatorio** (Uso interno, Consumo del
+    personal, Cortesía a cliente, Muestra u otro escrito). **No pide autorización** (lo pidió el cliente), pero baja
+    el stock con un movimiento `SALIDA` en el kardex, queda en la bitácora (`SALIDA_SIN_COBRO`) y en las tablas
+    `salidas`/`salida_detalle` con el costo y el precio del momento. No es una venta ni mueve efectivo: no aparece en
+    el corte. El admin lo revisa en **Inventario → Salidas sin cobro (F9)**: por periodo, quién, qué, motivo, cuánto
+    le costó al negocio y cuánto se dejó de vender; exportable a Excel. Permiso `SALIDA_SIN_COBRO` (cajero y admin).
+84. **Código que no existe en Vender**: si lo escaneado (o escrito) es un código válido con al menos un número y no
+    coincide con ningún producto ni por nombre, sale "Producto no encontrado" con **Dar de alta (Enter)** / **Buscar
+    por nombre** / Cancelar (Esc). "Dar de alta" abre el formulario de producto con el código ya puesto (empieza en
+    "Nombre") y, al guardarlo, el producto **se agrega a la venta en curso** (respeta `3*código`). Solo para quien
+    tiene `EDITAR_INVENTARIO` (admin); el cajero ve "pide al administrador que lo dé de alta" y puede buscar por
+    nombre. Una palabra sin números ("coca") sigue yendo directo al buscador.

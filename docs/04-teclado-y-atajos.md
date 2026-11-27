@@ -59,6 +59,7 @@ Objetivo: el cajero opera todo sin tocar el mouse. Esto se prueba en cada fase.
 | F4 | Asignar cliente (para fiado) |
 | F6 | Descuento (requiere admin si es cajero) |
 | F8 | Entrada / retiro de efectivo de caja |
+| F9 | Sacar sin cobrar (uso interno / personal / cortesía; pide motivo, baja stock, no toca la caja) |
 | F10 | Cobrar |
 | Ctrl+P | Reimprimir el ticket de la última venta |
 | F11 | Ventas del turno → `Enter` detalle, `P` reimprimir ticket, `C` cancelar (motivo con teclas 1–4), `D` devolver productos, `Shift+D` devolución por folio (en la devolución: `Enter` cantidad, `T` todo, `F10` devolver) |
@@ -85,7 +86,7 @@ usuario admin → contraseña → Enter.
 ## Otras pantallas
 - **Inventario**: `F2` buscar, `Ins`/`Ctrl+N` nuevo producto, `Enter` editar, `Ctrl+A` ajustar stock,
   `K` movimientos (kardex), `Supr` desactivar/reactivar, `F5` solo stock bajo, `F7` exportar,
-  `F8` lista de compras, escanear/escribir un código + `Enter` en el buscador lo elige o
+  `F8` lista de compras, `F9` salidas sin cobro (reporte por periodo, admin), escanear/escribir un código + `Enter` en el buscador lo elige o
   ofrece darlo de alta con ese código, `Ctrl+I` importar de Excel (vista previa, `F10` importa), `Esc` menú (o limpiar la búsqueda). En el formulario: `Ctrl+G` nueva categoría,
   ↑ ↓ cambian "Se vende por".
 - **Entrada de mercancía**: Proveedor → Factura → Código o nombre (Enter) → Cantidad (Enter) → Costo (Enter);

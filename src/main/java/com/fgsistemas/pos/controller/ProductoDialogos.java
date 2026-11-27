@@ -1,5 +1,6 @@
 package com.fgsistemas.pos.controller;
 
+import com.fgsistemas.pos.dao.SalidaDao;
 import com.fgsistemas.pos.model.MovimientoInventario;
 import com.fgsistemas.pos.model.Producto;
 import com.fgsistemas.pos.model.TipoVenta;
@@ -9,6 +10,7 @@ import com.fgsistemas.pos.service.Avisos;
 import com.fgsistemas.pos.service.InventarioService;
 import com.fgsistemas.pos.service.InventarioService.TipoAjuste;
 import com.fgsistemas.pos.service.PermisoDenegadoException;
+import com.fgsistemas.pos.service.SalidaService;
 import com.fgsistemas.pos.util.Acciones;
 import com.fgsistemas.pos.util.Alertas;
 import com.fgsistemas.pos.util.Cantidad;
@@ -27,6 +29,8 @@ import javafx.scene.input.KeyCombination;
 import javafx.util.StringConverter;
 
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -327,7 +331,7 @@ final class ProductoDialogos {
 
         Label encabezado = new Label(p.getCodigo() + " · Stock actual: " + p.stockTexto()
                 + "\nHistorial de todo lo que ha entrado y salido de este producto: ventas, cancelaciones, "
-                + "entradas de mercancía y ajustes, con el stock que quedó después de cada uno.");
+                + "entradas de mercancía, salidas sin cobro y ajustes, con el stock que quedó después de cada uno.");
         encabezado.setWrapText(true);
         encabezado.getStyleClass().add("texto-secundario");
         Button exportar = Acciones.boton("Exportar a Excel", null, () -> Exportar.excel(
@@ -345,6 +349,7 @@ final class ProductoDialogos {
             case "ENTRADA" -> "Entrada";
             case "AJUSTE" -> "Ajuste";
             case "DEVOLUCION" -> "Devolución";
+            case "SALIDA" -> "Salida sin cobro";
             default -> tipo;
         };
     }
@@ -354,6 +359,7 @@ final class ProductoDialogos {
             case "VENTA", "CANCELACION" -> "Venta #" + m.referenciaId();
             case "ENTRADA" -> "Entrada #" + m.referenciaId();
             case "DEVOLUCION" -> "Devolución #" + m.referenciaId();
+            case "SALIDA" -> "Salida #" + m.referenciaId();
             default -> "#" + m.referenciaId();
         };
         String motivo = m.motivo() == null ? "" : m.motivo();
@@ -402,6 +408,90 @@ final class ProductoDialogos {
                 "Lista de compras", List.of("Código", "Producto", "Unidad", "Stock", "Mínimo", "Comprar",
                         "Costo unitario", "Costo estimado"), filas));
         Tablas.dialogo("Lista de compras", null, tabla, pie, 1000, 560, List.of(exportar));
+    }
+
+    // ------------------------------------------------------------------ salidas sin cobro
+
+    private enum Periodo {
+        HOY("Hoy"), SEMANA("Últimos 7 días"), MES("Este mes"), MES_PASADO("Mes pasado"), TRES_MESES("Últimos 90 días");
+
+        private final String etiqueta;
+
+        Periodo(String etiqueta) {
+            this.etiqueta = etiqueta;
+        }
+
+        /** [desde, hasta) */
+        LocalDateTime[] rango() {
+            LocalDate hoy = Fechas.ahora().toLocalDate();
+            LocalDate manana = hoy.plusDays(1);
+            return switch (this) {
+                case HOY -> new LocalDateTime[]{hoy.atStartOfDay(), manana.atStartOfDay()};
+                case SEMANA -> new LocalDateTime[]{hoy.minusDays(6).atStartOfDay(), manana.atStartOfDay()};
+                case MES -> new LocalDateTime[]{hoy.withDayOfMonth(1).atStartOfDay(), manana.atStartOfDay()};
+                case MES_PASADO -> new LocalDateTime[]{hoy.withDayOfMonth(1).minusMonths(1).atStartOfDay(),
+                        hoy.withDayOfMonth(1).atStartOfDay()};
+                case TRES_MESES -> new LocalDateTime[]{hoy.minusDays(89).atStartOfDay(), manana.atStartOfDay()};
+            };
+        }
+    }
+
+    /** Reporte para el admin: qué se sacó sin cobrar, quién, cuándo, por qué y cuánto le costó al negocio. */
+    static void salidasSinCobro() {
+        SalidaService servicio = new SalidaService();
+        TableView<SalidaDao.Renglon> tabla = Tablas.tabla("No hubo salidas sin cobro en este periodo");
+        tabla.getColumns().add(Tablas.col("Fecha", 140, r -> Fechas.FECHA_HORA.format(r.fecha())));
+        tabla.getColumns().add(Tablas.colDerecha("Salida", 70, r -> "#" + r.salidaId()));
+        tabla.getColumns().add(Tablas.col("Quién", 130, SalidaDao.Renglon::usuario));
+        tabla.getColumns().add(Tablas.col("Producto", 230, SalidaDao.Renglon::producto));
+        tabla.getColumns().add(Tablas.colDerecha("Cantidad", 100,
+                r -> Cantidad.formatear(r.cantidad(), r.tipo(), r.unidad())));
+        tabla.getColumns().add(Tablas.colDerecha("Costo", 100,
+                r -> Dinero.formatear(Cantidad.importe(r.costoUnitario(), r.cantidad()))));
+        tabla.getColumns().add(Tablas.colDerecha("Valor venta", 110,
+                r -> Dinero.formatear(Cantidad.importe(r.precioUnitario(), r.cantidad()))));
+        tabla.getColumns().add(Tablas.col("Motivo", 200, SalidaDao.Renglon::motivo));
+
+        ComboBox<Periodo> cmbPeriodo = new ComboBox<>(FXCollections.observableArrayList(Periodo.values()));
+        cmbPeriodo.setConverter(convertidor(x -> x.etiqueta));
+        cmbPeriodo.setValue(Periodo.MES);
+        Teclado.comboConFlechas(cmbPeriodo);
+        Label explicacion = new Label("Productos que el personal sacó del inventario sin cobrarlos (F9 en Vender).");
+        explicacion.getStyleClass().add("texto-secundario");
+        javafx.scene.layout.HBox encabezado = new javafx.scene.layout.HBox(12, new Label("Periodo"), cmbPeriodo,
+                explicacion);
+        encabezado.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        Label pie = new Label();
+        pie.getStyleClass().add("pie-tabla");
+
+        Runnable cargar = () -> {
+            try {
+                LocalDateTime[] r = cmbPeriodo.getValue().rango();
+                List<SalidaDao.Renglon> renglones = servicio.listar(r[0], r[1]);
+                tabla.setItems(FXCollections.observableArrayList(renglones));
+                long costo = renglones.stream().mapToLong(x -> Cantidad.importe(x.costoUnitario(), x.cantidad())).sum();
+                long valor = renglones.stream().mapToLong(x -> Cantidad.importe(x.precioUnitario(), x.cantidad())).sum();
+                long salidas = renglones.stream().mapToLong(SalidaDao.Renglon::salidaId).distinct().count();
+                pie.setText(salidas + (salidas == 1 ? " salida" : " salidas") + " · Le costó al negocio: "
+                        + Dinero.formatear(costo) + " · Se dejó de vender: " + Dinero.formatear(valor));
+            } catch (SQLException e) {
+                Flujo.errorDatos(e);
+            } catch (PermisoDenegadoException e) {
+                Alertas.error(e.getMessage());
+            }
+        };
+        cmbPeriodo.valueProperty().addListener((o, a, n) -> cargar.run());
+        cargar.run();
+
+        Button exportar = Acciones.boton("Exportar a Excel", null, () -> Exportar.excel("salidas_sin_cobro",
+                "Salidas sin cobro", List.of("Fecha", "Salida", "Quién", "Código", "Producto", "Cantidad",
+                        "Costo unitario", "Costo", "Precio", "Valor venta", "Motivo"),
+                tabla.getItems().stream().map(r -> List.<Object>of(Fechas.FECHA_HORA.format(r.fecha()),
+                        r.salidaId(), r.usuario(), r.codigo(), r.producto(), new Cant(r.cantidad()),
+                        new Monto(r.costoUnitario()), new Monto(Cantidad.importe(r.costoUnitario(), r.cantidad())),
+                        new Monto(r.precioUnitario()), new Monto(Cantidad.importe(r.precioUnitario(), r.cantidad())),
+                        r.motivo())).toList()));
+        Tablas.dialogo("Salidas sin cobro", encabezado, tabla, pie, 1150, 580, List.of(exportar));
     }
 
     // ------------------------------------------------------------------ utilidades

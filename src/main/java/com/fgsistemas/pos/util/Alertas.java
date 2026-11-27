@@ -76,6 +76,31 @@ public final class Alertas {
         return r.isPresent() && r.get() == SI;
     }
 
+    /**
+     * Pregunta con varias opciones (botones en ese orden, el primero con el foco) más "Cancelar (Esc)".
+     *
+     * @return el índice de la opción elegida, o -1 si se canceló
+     */
+    public static int elegir(String titulo, String mensaje, String... opciones) {
+        ButtonType[] botones = new ButtonType[opciones.length + 1];
+        for (int i = 0; i < opciones.length; i++) {
+            botones[i] = new ButtonType(opciones[i],
+                    i == 0 ? ButtonBar.ButtonData.OK_DONE : ButtonBar.ButtonData.OTHER);
+        }
+        ButtonType cancelar = new ButtonType("Cancelar (Esc)", ButtonBar.ButtonData.CANCEL_CLOSE);
+        botones[opciones.length] = cancelar;
+        Alert alerta = crear(Alert.AlertType.CONFIRMATION, titulo, mensaje, botones);
+        Button primero = (Button) alerta.getDialogPane().lookupButton(botones[0]);
+        alerta.setOnShown(e -> primero.requestFocus());
+        Optional<ButtonType> r = alerta.showAndWait();
+        for (int i = 0; r.isPresent() && i < opciones.length; i++) {
+            if (r.get() == botones[i]) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     private static void mostrar(Alert.AlertType tipo, String titulo, String mensaje) {
         Alert alerta = crear(tipo, titulo, mensaje, ACEPTAR);
         alerta.showAndWait();

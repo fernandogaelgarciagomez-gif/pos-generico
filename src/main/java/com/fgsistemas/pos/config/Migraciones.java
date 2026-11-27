@@ -20,6 +20,7 @@ public final class Migraciones {
     static final String[] SCRIPTS = {
             "/db/V1__esquema_inicial.sql",
             "/db/V2__devoluciones.sql",
+            "/db/V3__salidas_sin_cobro.sql",
     };
 
     private Migraciones() {

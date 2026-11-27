@@ -4,9 +4,11 @@ import com.fgsistemas.pos.config.Hardware;
 import com.fgsistemas.pos.model.Carrito;
 import com.fgsistemas.pos.model.MetodoPago;
 import com.fgsistemas.pos.model.Negocio;
+import com.fgsistemas.pos.model.Permiso;
 import com.fgsistemas.pos.model.Producto;
 import com.fgsistemas.pos.service.InventarioService;
 import com.fgsistemas.pos.service.PermisoDenegadoException;
+import com.fgsistemas.pos.service.Validacion;
 import com.fgsistemas.pos.service.VentaService;
 import com.fgsistemas.pos.service.VentaService.Pago;
 import com.fgsistemas.pos.service.VentaService.VentaRegistrada;
@@ -19,6 +21,7 @@ import com.fgsistemas.pos.util.CodigoBarras;
 import com.fgsistemas.pos.util.Dinero;
 import com.fgsistemas.pos.util.Iniciales;
 import com.fgsistemas.pos.util.LectorCodigos;
+import com.fgsistemas.pos.util.Sesion;
 import com.fgsistemas.pos.util.Teclado;
 import com.fgsistemas.pos.util.Texto;
 import javafx.collections.FXCollections;
@@ -180,6 +183,10 @@ public class VenderController {
         Button cobrar = Acciones.agregar(barraAcciones, raiz, "Cobrar", "F10", new KeyCodeCombination(KeyCode.F10),
                 false, this::cobrar);
         cobrar.getStyleClass().add("boton-principal");
+        if (Sesion.tiene(Permiso.SALIDA_SIN_COBRO)) {
+            Acciones.agregar(barraAcciones, raiz, "Sacar sin cobrar", "F9", new KeyCodeCombination(KeyCode.F9),
+                    false, this::sacarSinCobrar);
+        }
         Acciones.agregar(barraAcciones, raiz, "Ventas del turno / cancelar", "F11",
                 new KeyCodeCombination(KeyCode.F11), false, this::ventasDelTurno);
         Acciones.agregar(barraAcciones, raiz, "Reimprimir ticket", "Ctrl+P",
@@ -332,6 +339,10 @@ public class VenderController {
             return;
         }
         aviso("Producto no encontrado: \"" + cap.codigo() + "\"");
+        if (pareceCodigoNuevo(cap.codigo())) {
+            ofrecerAlta(cap);
+            return;
+        }
         Optional<Producto> elegido = BuscadorProductos.buscar(catalogo, cap.codigo(), true);
         if (elegido.isPresent()) {
             agregar(elegido.get(), cap);
@@ -339,6 +350,60 @@ public class VenderController {
             txtCodigo.requestFocus();
             txtCodigo.selectAll();
         }
+    }
+
+    /**
+     * Lo capturado parece un código (de barras o clave interna) que no coincide con nada del catálogo, ni siquiera
+     * por nombre: es un código válido y lleva al menos un número. Una palabra suelta ("coca") va al buscador.
+     */
+    private boolean pareceCodigoNuevo(String codigo) {
+        if (Validacion.codigoProducto(codigo) != null || codigo.chars().noneMatch(Character::isDigit)) {
+            return false;
+        }
+        return catalogo.stream().noneMatch(p -> Texto.contieneTodas(p.getCodigo() + " " + p.getNombre(), codigo));
+    }
+
+    /**
+     * Código que no existe: ofrece darlo de alta ahí mismo (con el código ya puesto) y agregarlo a la venta,
+     * o buscar el producto por nombre. Dar de alta requiere permiso de editar inventario.
+     */
+    private void ofrecerAlta(Captura cap) {
+        String codigo = cap.codigo();
+        boolean puedeDarAlta = Sesion.tiene(Permiso.EDITAR_INVENTARIO);
+        String titulo = "Producto no encontrado";
+        String mensaje = "No se encontró ningún producto con el código \"" + codigo + "\".\n\n";
+        boolean darAlta;
+        boolean buscar;
+        if (puedeDarAlta) {
+            int opcion = Alertas.elegir(titulo, mensaje + "¿Quieres darlo de alta como producto nuevo con ese "
+                    + "código? Al guardarlo se agrega a la venta.", "Dar de alta (Enter)", "Buscar por nombre");
+            darAlta = opcion == 0;
+            buscar = opcion == 1;
+        } else {
+            darAlta = false;
+            buscar = Alertas.elegir(titulo, mensaje + "Si es un producto nuevo, pide al administrador que lo dé "
+                    + "de alta en Inventario.", "Buscar por nombre (Enter)") == 0;
+        }
+        if (darAlta) {
+            Optional<Producto> creado = ProductoDialogos.formulario(null, codigo);
+            if (creado.isPresent()) {
+                cargarCatalogo();
+                Producto p = buscarPorCodigo(creado.get().getCodigo()).orElse(creado.get());
+                lblAviso.setText("");
+                Alertas.toast("Producto \"" + p.getNombre() + "\" dado de alta");
+                agregar(p, cap);
+                txtCodigo.requestFocus();
+                return;
+            }
+        } else if (buscar) {
+            Optional<Producto> elegido = BuscadorProductos.buscar(catalogo, "", true);
+            if (elegido.isPresent()) {
+                agregar(elegido.get(), cap);
+                return;
+            }
+        }
+        txtCodigo.requestFocus();
+        txtCodigo.selectAll();
     }
 
     /** Código exacto; si no, sus equivalentes (UPC-A de 12 dígitos = EAN-13 con 0 adelante, etc.). */
@@ -588,6 +653,21 @@ public class VenderController {
             Alertas.advertencia(e.getMessage());
         } catch (SQLException e) {
             Flujo.errorDatos(e);
+        }
+        txtCodigo.requestFocus();
+    }
+
+    /** F9: los productos del carrito salen del inventario sin cobrarse (uso interno, personal, cortesía). */
+    private void sacarSinCobrar() {
+        if (carrito.vacio()) {
+            aviso("Primero agrega los productos que se van a sacar sin cobrar.");
+            return;
+        }
+        if (VentaDialogos.salidaSinCobro(carrito)) {
+            carrito.limpiar();
+            cargarCatalogo(); // stock actualizado en los mosaicos
+            txtCodigo.clear();
+            refrescar();
         }
         txtCodigo.requestFocus();
     }
