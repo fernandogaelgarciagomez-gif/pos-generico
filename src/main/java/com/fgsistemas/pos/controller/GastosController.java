@@ -60,7 +60,7 @@ public class GastosController {
         Acciones.agregar(barraAcciones, raiz, "Nuevo ingreso", "I", new KeyCodeCombination(KeyCode.I), true,
                 () -> nuevo(Tipo.ENTRADA));
         Acciones.espaciador(barraAcciones);
-        Acciones.agregar(barraAcciones, raiz, "Menú", "Esc", new KeyCodeCombination(KeyCode.ESCAPE), false,
+        Acciones.regresar(barraAcciones, raiz, "Regresar al menú",
                 Flujo::irAlMenu);
         cargar();
         Teclado.enfocar(tabla);

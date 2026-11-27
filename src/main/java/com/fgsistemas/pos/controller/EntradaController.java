@@ -187,7 +187,7 @@ public class EntradaController {
         Acciones.agregar(barraAcciones, raiz, "Historial", "F11", new KeyCodeCombination(KeyCode.F11), false,
                 HistorialEntradas::mostrar);
         Acciones.espaciador(barraAcciones);
-        Acciones.agregar(barraAcciones, raiz, "Menú", "Esc", new KeyCodeCombination(KeyCode.ESCAPE), false,
+        Acciones.regresar(barraAcciones, raiz, "Regresar al menú",
                 this::escape);
     }
 

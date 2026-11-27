@@ -74,8 +74,7 @@ public class UsuariosController {
                 new KeyCodeCombination(KeyCode.P, javafx.scene.input.KeyCombination.SHORTCUT_DOWN), false,
                 this::cambiarMiPassword);
         Acciones.espaciador(barraAcciones);
-        Acciones.agregar(barraAcciones, raiz, "Menú", "Esc",
-                new KeyCodeCombination(KeyCode.ESCAPE), false, Flujo::irAlMenu);
+        Acciones.regresar(barraAcciones, raiz, "Regresar al menú", Flujo::irAlMenu);
         tabla.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
             if (e.getCode() == KeyCode.ENTER) {
                 e.consume();

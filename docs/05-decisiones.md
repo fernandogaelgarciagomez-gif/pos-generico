@@ -240,3 +240,6 @@ Este archivo **manda** sobre el resto de los docs si hay contradicción.
     Java incluido, se empaqueta con `-RequiereInstalador` y el programa manda a bajar el instalador. Aviso al admin al
     entrar al menú, una vez al día y en segundo plano (sin internet no molesta).
 86. **Consulta desde el celular**: acordada y pendiente de planear (`docs/07-consulta-movil-pendiente.md`).
+87. **Botón de regresar visible** (pedido del cliente): en todas las pantallas el botón de Esc ("Regresar al menú",
+    "Vaciar / Menú" en Vender, "Regresar" en el corte) es **ámbar con flecha** y va **primero** en la barra de acciones
+    (`Acciones.regresar` / `Acciones.estiloRegresar`, colores `-pos-regresar*` del tema).

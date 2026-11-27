@@ -270,7 +270,7 @@ public class InventarioController {
         Acciones.agregar(barraAcciones, raiz, "Exportar a Excel", "F7", new KeyCodeCombination(KeyCode.F7), false,
                 this::exportar);
         Acciones.espaciador(barraAcciones);
-        Acciones.agregar(barraAcciones, raiz, "Menú", "Esc", new KeyCodeCombination(KeyCode.ESCAPE), false,
+        Acciones.regresar(barraAcciones, raiz, "Regresar al menú",
                 this::escape);
     }
 

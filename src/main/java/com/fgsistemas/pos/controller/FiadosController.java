@@ -196,7 +196,7 @@ public class FiadosController {
         Acciones.agregar(barraAcciones, raiz, "Solo con adeudo", "F5", new KeyCodeCombination(KeyCode.F5), false,
                 () -> chkConAdeudo.setSelected(!chkConAdeudo.isSelected()));
         Acciones.espaciador(barraAcciones);
-        Acciones.agregar(barraAcciones, raiz, "Menú", "Esc", new KeyCodeCombination(KeyCode.ESCAPE), false,
+        Acciones.regresar(barraAcciones, raiz, "Regresar al menú",
                 this::escape);
     }
 

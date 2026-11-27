@@ -191,8 +191,7 @@ public class VenderController {
                 new KeyCodeCombination(KeyCode.F11), false, this::ventasDelTurno);
         Acciones.agregar(barraAcciones, raiz, "Reimprimir ticket", "Ctrl+P",
                 new KeyCodeCombination(KeyCode.P, KeyCombination.SHORTCUT_DOWN), false, this::reimprimir);
-        Acciones.agregar(barraAcciones, raiz, "Vaciar / Menú", "Esc", new KeyCodeCombination(KeyCode.ESCAPE),
-                false, this::escape);
+        Acciones.regresar(barraAcciones, raiz, "Vaciar / Menú", this::escape);
     }
 
     // ------------------------------------------------------------------ catálogo y mosaicos

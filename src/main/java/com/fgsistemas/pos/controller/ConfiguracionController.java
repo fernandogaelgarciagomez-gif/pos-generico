@@ -163,7 +163,7 @@ public class ConfiguracionController {
                 new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN), false, this::guardar);
         barraAcciones.getChildren().add(Acciones.boton("Siguiente pestaña", "Ctrl+Tab", () -> cambiarPestana(1)));
         Acciones.espaciador(barraAcciones);
-        Acciones.agregar(barraAcciones, raiz, "Menú", "Esc", new KeyCodeCombination(KeyCode.ESCAPE), false,
+        Acciones.regresar(barraAcciones, raiz, "Regresar al menú",
                 this::salir);
         // Ctrl+Tab / Ctrl+Shift+Tab desde cualquier campo (los campos de texto se quedarían con la tecla).
         raiz.addEventFilter(KeyEvent.KEY_PRESSED, e -> {

@@ -191,7 +191,7 @@ public class CorteController {
 
         Button continuar = Acciones.boton("Continuar", "Enter", this::continuar);
         continuar.getStyleClass().add("boton-principal");
-        Button salir = Acciones.boton(ajeno ? "Regresar" : "Regresar al menú", "Esc", this::salirSinCorte);
+        Button salir = Acciones.estiloRegresar(Acciones.boton(ajeno ? "Regresar" : "Regresar al menú", "Esc", this::salirSinCorte));
 
         VBox tarjeta = tarjeta(titulo, info, ayuda, modoTotal, modoDesglose, btnModo,
                 secundario("Notas"), txtNotas, lblError, barra(continuar, salir));
@@ -299,7 +299,7 @@ public class CorteController {
 
         Button cerrar = Acciones.boton("Cerrar turno", "Enter", this::cerrarTurno);
         cerrar.getStyleClass().add("boton-principal");
-        Button regresar = Acciones.boton("Regresar al conteo", "Esc", this::regresarAlConteo);
+        Button regresar = Acciones.estiloRegresar(Acciones.boton("Regresar al conteo", "Esc", this::regresarAlConteo));
         mostrar(tarjeta(titulo, info, vista, nota, lblError2, barra(cerrar, regresar)));
         Teclado.enfocar(txtNotaDiferencia);
     }

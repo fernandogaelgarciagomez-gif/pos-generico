@@ -38,6 +38,30 @@ public final class Acciones {
         return b;
     }
 
+    /**
+     * Botón para regresar (Esc), igual en todas las pantallas: ámbar con flecha y SIEMPRE el primero de la barra,
+     * para encontrarlo luego luego (pedido del cliente, decisión 87).
+     */
+    public static Button regresar(Pane barra, Node raiz, String texto, Runnable accion) {
+        Button b = boton(texto, "Esc", accion);
+        estiloRegresar(b);
+        barra.getChildren().add(0, b);
+        atajo(raiz, new javafx.scene.input.KeyCodeCombination(javafx.scene.input.KeyCode.ESCAPE), false, accion);
+        return b;
+    }
+
+    /** Da el aspecto del botón de regresar (ámbar con flecha) a un botón ya creado con {@link #boton}. */
+    public static Button estiloRegresar(Button b) {
+        b.getStyleClass().add("boton-regresar");
+        org.kordamp.ikonli.javafx.FontIcon flecha = new org.kordamp.ikonli.javafx.FontIcon("mdi2a-arrow-left-bold");
+        flecha.getStyleClass().add("icono-regresar");
+        HBox grafico = b.getGraphic() == null ? new HBox(6, flecha) : new HBox(6, flecha, b.getGraphic());
+        grafico.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        b.setGraphic(grafico);
+        b.setContentDisplay(ContentDisplay.LEFT);
+        return b;
+    }
+
     /** Botón de acción sin registrar atajo (el atajo lo maneja la pantalla, p. ej. Enter en una tabla). */
     public static Button boton(String texto, String teclaTexto, Runnable accion) {
         Button b = new Button(texto);
